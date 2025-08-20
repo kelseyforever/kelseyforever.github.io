@@ -1,5 +1,5 @@
 const gallery = document.getElementById('gallery');
-const lightbox = document.getId('lightbox');
+const lightbox = document.getElementById('lightbox');
 const lightContent = document.getElementById('lightContent');
 const downloadLink = document.getElementById('download');
 
