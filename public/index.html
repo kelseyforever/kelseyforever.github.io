@@ -22,11 +22,13 @@
   <div id="gallery"></div>
 
   <!-- lightbox -->
-  <div id="lightbox" class="hidden">
-    <button id="close">×</button>
+  <div id="lightbox" class="hidden" onclick="closeLightbox(event)">
+  <div id="lightContentWrapper">
+    <button id="close">✕</button>
     <div id="lightContent"></div>
     <a id="download" href="#" download>Download</a>
   </div>
+</div>
 <button id="shuffleBtn" class="floating-btn">🔀 Shuffle</button>
 <button id="topBtn" class="floating-btn">⬆️ Top</button>
 <script src="script.js"></script>

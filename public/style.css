@@ -205,3 +205,34 @@ header .intro {
 .item img:hover, .item video:hover {
   transform: translateY(-4px);
 }
+/* Masonry column layout */
+#gallery {
+  column-count: 3;
+  column-gap: 18px;
+}
+
+.item {
+  break-inside: avoid;
+  margin-bottom: 18px;
+}
+
+/* image/video common styles */
+.item img,
+.item video {
+  width: 100%;
+  display: block;
+  border-radius: 8px;
+  transition: transform .2s;
+}
+
+.item img:hover,
+.item video:hover {
+  transform: translateY(-4px);
+}
+#lightbox {
+  pointer-events: auto;
+}
+
+#lightContent {
+  pointer-events: none; /* so clicks *don’t* get absorbed by this invisible div */
+}
