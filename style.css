@@ -1,64 +1,49 @@
-body {
-  background:#121212;
-  color:#fff;
-  font-family:sans-serif;
-  margin:0;
-}
+/* base */
+*{box-sizing:border-box}
+body{background:#121212;color:#fff;font-family:sans-serif;margin:0}
+header{text-align:center;padding:40px 0 10px;position:relative;z-index:2}
+header h1{margin:0;font-size:32px}
+header h2{margin:6px 0 20px;font-size:15px;font-weight:400}
+.intro{max-width:650px;margin:0 auto 30px;line-height:1.6;font-size:14px;color:#ddd}
+.filters{margin-bottom:30px}
+.filters button{margin:0 6px;border:none;padding:6px 14px;background:#2d2d2d;color:#fff;border-radius:30px;cursor:pointer;font-size:14px}
+.filters button.active{background:#fff;color:#000}
 
-header {
-  text-align:center;
-  padding:40px 0 10px;
-  position:relative;
-  z-index:2;
-}
+/* hero */
+.hero{position:fixed;top:0;left:0;width:100%;height:450px;background-image:url('assets/photos/kels.png');background-size:cover;background-position:center center;filter:grayscale(70%) brightness(60%);z-index:-1}
 
-h1{margin:0;font-size:32px;}
-h2{margin:6px 0 20px;font-size:15px;font-weight:400;}
-.intro{max-width:650px;margin:0 auto 30px;line-height:1.6;font-size:14px;color:#ddd;}
+/* gallery */
+#gallery{column-count:3;column-gap:18px;padding:480px 18px 120px}
+.item{break-inside:avoid;margin-bottom:18px}
+.item img,.item video{width:100%;display:block;border-radius:8px;transition:transform .2s}
+.item:hover img,.item:hover video{transform:translateY(-4px)}
 
-.filters{margin-bottom:30px;}
-.filters button{
-  margin:0 6px;border:none;padding:6px 14px;background:#2d2d2d;
-  color:#fff;border-radius:30px;cursor:pointer;font-size:14px;
-}
-.filters button.active{background:#fff;color:#000;}
+/* 🔥 hard-disable any opacity tricks so tiles never vanish */
+#gallery .item img,#gallery .item video{opacity:1 !important;}
 
-.hero{
-  position:fixed;
-  top:0;left:0;width:100%;height:450px;
-  background:url(assets/photos/kels.png) center/cover no-repeat;
-  filter:grayscale(70%) brightness(60%);
-  z-index:-1;
-}
+/* videos look decent in tiles */
+.item video{object-fit:cover;background:#000}
 
-#gallery{
-  column-count:3;
-  column-gap:18px;
-  padding:480px 18px 120px;
-}
-.item{
-  break-inside:avoid;margin-bottom:18px;
-}
-.item img,.item video{
-  width:100%;display:block;border-radius:8px;opacity:0;transition:.3s;
-}
-.item.loaded img,.item.loaded video{opacity:1;}
-.item:hover img,.item:hover video{transform:translateY(-4px);}
+/* lightbox */
+#lightbox{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;justify-content:center;align-items:center;z-index:9999}
+#lightbox.hidden{display:none}
+#lightContentWrapper{position:relative;max-width:80%;max-height:90%}
+#lightContent img,#lightContent video{max-width:100%;max-height:100%}
+#close{position:absolute;top:-35px;right:-35px;background:none;color:#fff;font-size:35px;border:none;cursor:pointer}
+#download{color:#fff;margin-top:10px;font-size:12px;text-decoration:none;padding:5px 15px;background:rgba(255,255,255,.12);border-radius:6px}
 
-#lightbox{
-  position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;
-  justify-content:center;align-items:center;z-index:9999;
-}
-#lightbox.hidden{display:none;}
-#lightContentWrapper{position:relative;max-width:80%;max-height:90%;}
-#lightContent img,#lightContent video{max-width:100%;max-height:100%;}
-#close{position:absolute;top:-35px;right:-35px;background:none;color:#fff;font-size:35px;border:none;cursor:pointer;}
-#download{color:#fff;margin-top:10px;font-size:12px;text-decoration:none;padding:5px 15px;background:rgba(255,255,255,.12);border-radius:6px;}
+/* floating buttons */
+.floating-btn{position:fixed;bottom:15px;background:rgba(255,255,255,.15);color:#fff;border:none;padding:8px 14px;border-radius:30px;cursor:pointer;z-index:10000;backdrop-filter:blur(5px);transition:transform .15s ease,opacity .15s ease}
+.floating-btn:hover{transform:translateY(-4px) scale(1.05);opacity:.85}
+.floating-btn:active{transform:translateY(0) scale(.96)}
+#topBtn{right:120px}
+#shuffleBtn{right:20px}
 
-.floating-btn{
-  position:fixed;bottom:15px;background:rgba(255,255,255,.15);color:#fff;border:none;
-  padding:8px 14px;border-radius:30px;cursor:pointer;z-index:10000;backdrop-filter:blur(5px);
-  transition: .15s;
+/* mobile tweaks */
+@media (max-width: 900px){
+  #gallery{column-count:2;padding:480px 12px 100px}
+  .filters button{margin:0 4px}
 }
-.floating-btn:hover{transform:translateY(-4px) scale(1.05);}
-#topBtn{right:120px;}#shuffleBtn{right:20px;}
+@media (max-width: 560px){
+  #gallery{column-count:1;padding:480px 10px 90px}
+}
