@@ -20,9 +20,9 @@ function load(type, list) {
       const vid = document.createElement('video');
       vid.src = `assets/videos/${name}`;
       vid.muted = true;
-      vid.onmouseenter=()=>vid.play();
-      vid.onmouseleave=()=>vid.pause();
-      vid.onclick = () => openLightbox(vid.src, 'video');
+      vid.onmouseenter = ()=>vid.play();
+      vid.onmouseleave =()=>vid.pause();
+      vid.onclick       = () => openLightbox(vid.src, 'video');
       div.appendChild(vid);
     }
     gallery.appendChild(div);
@@ -41,64 +41,49 @@ function openLightbox(url,type){
 document.getElementById('close').onclick = () => {
   lightbox.classList.add('hidden');
   const vid = lightContent.querySelector('video');
-  if (vid) {
-    vid.pause();
-    vid.currentTime = 0;
-  }
+  if (vid) { vid.pause(); vid.currentTime = 0; }
 };
 
 // render with optional shuffle
 function render(shuffled = false){
   gallery.innerHTML='';
-  Promise.all([fetch('photos.json').then(r=>r.json()), fetch('videos.json').then(r=>r.json())])
-  .then(([p,v])=>{
+  Promise.all([fetch('photos.json').then(r=>r.json()), fetch('videos.json').then(r=>r.json())]).then(([p,v])=>{
     let list = [...p, ...v];
     list = list.filter((n, i) => list.indexOf(n) === i);
-    if (shuffled) {
-      for (let i = list.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [list[i], list[j]] = [list[j], list[i]];
-      }
-    }
-    load('photo', p.filter(n=>list.includes(n)));
-    load('video', v.filter(n=>list.includes(n)));
-    bindFilters(); // re-enable filter buttons
+    if (shuffled) for(let i=list.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[list[i],list[j]]=[list[j],list[i]];}
+    load('photo', list.filter(n=>p.includes(n)));
+    load('video', list.filter(n=>v.includes(n)));
+    bindFilters();
+
+    // fade in AFTER elements are rendered
+    const observer = new IntersectionObserver(entries=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting){
+          e.target.classList.add('loaded');
+          observer.unobserve(e.target);
+        }
+      });
+    });
+    document.querySelectorAll('#gallery img').forEach(img=>observer.observe(img));
   });
 }
 
-// All / Photos / Videos
 function bindFilters(){
   filters.forEach(btn => {
-    btn.onclick = () => {
-      filters.forEach(b => b.classList.remove('active'));
+    btn.onclick=()=>{
+      filters.forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
       const t = btn.dataset.type;
       document.querySelectorAll('#gallery .item').forEach(it=>{
-        it.style.display = (t==='all' || it.dataset.type===t) ? 'block' : 'none';
+        it.style.display=(t==='all' || it.dataset.type===t)?'block':'none';
       });
-    };
+    }
   });
 }
 
-// Shuffle button
-document.getElementById('shuffleBtn').addEventListener('click', ()=>render(true));
+document.getElementById('shuffleBtn').addEventListener('click',()=>render(true));
+document.getElementById('topBtn').addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+window.addEventListener('scroll',()=>{document.getElementById('topBtn').style.display = window.scrollY>300?'block':'none';});
 
-// Back to top
-document.getElementById('topBtn').addEventListener('click', ()=>window.scrollTo({top:0,behavior:'smooth'}));
-window.addEventListener('scroll', ()=>{
-  document.getElementById('topBtn').style.display = window.scrollY>300?'block':'none';
-});
-
-// Initial render
+// initial render
 render(true);
-
-// Fade-in observer AFTER initial render
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(e=>{
-    if(e.isIntersecting){
-      e.target.classList.add('loaded');
-      observer.unobserve(e.target);
-    }
-  });
-});
-document.querySelectorAll('#gallery img').forEach(img=>observer.observe(img));

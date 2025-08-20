@@ -182,3 +182,5 @@ header .intro {
 .item {
   min-height: 250px; /* reserve space so things don't jump while loading */
 }
+#topBtn { right: 160px; }
+#shuffleBtn { margin-left: 14px; }
