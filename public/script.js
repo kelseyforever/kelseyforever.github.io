@@ -3,52 +3,34 @@ const lightbox = document.getElementById('lightbox');
 const lightContent = document.getElementById('lightContent');
 const downloadLink = document.getElementById('download');
 
-/* --- load photos --- */
-fetchPhotos();
-fetchVideos();
+/* --- load from JSON lists --- */
+function load(type, json) {
+  json.forEach(name => {
+    const div = document.createElement('div');
+    div.className = 'item';
+    div.dataset.type = type;
 
-function fetchPhotos() {
-  fetch('assets/photos/')
-    .then(r => r.text())
-    .then(html => {
-      const temp = new DOMParser().parseFromString(html, 'text/html');
-      Array.from(temp.links).forEach(file => {
-        if (/\.(jpe?g|png|webp)$/i.test(file.href)) {
-          const div = document.createElement('div');
-          div.className = 'item';
-          div.setAttribute('data-type','photo');
-          const img = document.createElement('img');
-          img.src = file.href;
-          img.onclick = () => openLightbox(file.href, 'img');
-          div.appendChild(img);
-          gallery.appendChild(div);
-        }
-      });
-    });
+    if (type === 'photo') {
+      const img = document.createElement('img');
+      img.src = `assets/${type}s/${name}`;
+      img.onclick = () => openLightbox(img.src, 'img');
+      div.appendChild(img);
+    } else {
+      const vid = document.createElement('video');
+      vid.src = `assets/${type}s/${name}`;
+      vid.muted = true;
+      vid.onmouseenter=()=>vid.play();
+      vid.onmouseleave=()=>vid.pause();
+      vid.onclick = () => openLightbox(vid.src, 'video');
+      div.appendChild(vid);
+    }
+    gallery.appendChild(div);
+  });
 }
 
-function fetchVideos() {
-  fetch('assets/videos/')
-    .then(r => r.text())
-    .then(html => {
-      const temp = new DOMParser().parseFromString(html, 'text/html');
-      Array.from(temp.links).forEach(file => {
-        if (/\.(mp4|mov|webm)$/i.test(file.href)) {
-          const div = document.createElement('div');
-          div.className = 'item';
-          div.setAttribute('data-type','video');
-          const vid = document.createElement('video');
-          vid.src = file.href;
-          vid.muted = true;
-          vid.onmouseenter=()=>vid.play();
-          vid.onmouseleave=()=>vid.pause();
-          vid.onclick = () => openLightbox(file.href, 'video');
-          div.appendChild(vid);
-          gallery.appendChild(div);
-        }
-      });
-    });
-}
+/* --- fetch generated JSON --- */
+fetch('photos.json').then(r=>r.json()).then(d=>load('photo',d));
+fetch('videos.json').then(r=>r.json()).then(d=>load('video',d));
 
 /* --- filter buttons --- */
 document.querySelectorAll('.filters button').forEach(btn=>{
@@ -69,7 +51,7 @@ function openLightbox(url,type){
   downloadLink.href=url;
   if(type==='img'){
     lightContent.innerHTML = `<img src="${url}">`;
-  }else{
+  } else {
     lightContent.innerHTML=`<video src="${url}" controls autoplay></video>`;
   }
 }
