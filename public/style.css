@@ -135,3 +135,29 @@ header .intro {
   cursor:pointer;
   line-height:1;
 }
+/* floating shuffle + top buttons */
+.floating-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 30px;
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+  margin-left: 8px;
+  font-size: 14px;
+  transition: transform 0.2s;
+}
+
+.floating-btn:hover {
+  transform: translateY(-3px);
+}
+
+#topBtn {
+  right: 100px; /* push it left so both show */
+  display: none;
+}
