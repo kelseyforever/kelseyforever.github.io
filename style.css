@@ -1,121 +1,207 @@
-/* base */
-*{box-sizing:border-box}
-body{background:#121212;color:#fff;font-family:sans-serif;margin:0}
-header{text-align:center;padding:40px 0 10px;position:relative;z-index:2}
-header h1{margin:0;font-size:32px}
-header h2{margin:6px 0 20px;font-size:15px;font-weight:400}
-.intro{max-width:650px;margin:0 auto 30px;line-height:1.6;font-size:14px;color:#ddd}
-.filters{margin-bottom:30px}
-.filters button{margin:0 6px;border:none;padding:6px 14px;background:#2d2d2d;color:#fff;border-radius:30px;cursor:pointer;font-size:14px}
-.filters button.active{background:#fff;color:#000}
+/* =======================
+   Base
+======================= */
+* { box-sizing: border-box; }
 
-/* hero */
-.hero{position:fixed;top:0;left:0;width:100%;height:450px;background-image:url('assets/photos/kels.png');background-size:cover;background-position:center center;filter:grayscale(70%) brightness(60%);z-index:-1}
-
-/* gallery */
-#gallery{column-count:3;column-gap:18px;padding:480px 18px 120px}
-.item{break-inside:avoid;margin-bottom:18px}
-.item img,.item video{width:100%;display:block;border-radius:8px;transition:transform .2s}
-.item:hover img,.item:hover video{transform:translateY(-4px)}
-
-/* 🔥 hard-disable any opacity tricks so tiles never vanish */
-#gallery .item img,#gallery .item video{opacity:1 !important;}
-
-/* videos look decent in tiles */
-.item video{object-fit:cover;background:#000}
-
-/* lightbox */
-#lightbox{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;justify-content:center;align-items:center;z-index:9999}
-#lightbox.hidden{display:none}
-#lightContentWrapper{position:relative;max-width:80%;max-height:90%}
-#lightContent img,#lightContent video{max-width:100%;max-height:100%}
-#close{position:absolute;top:-35px;right:-35px;background:none;color:#fff;font-size:35px;border:none;cursor:pointer}
-#download{color:#fff;margin-top:10px;font-size:12px;text-decoration:none;padding:5px 15px;background:rgba(255,255,255,.12);border-radius:6px}
-
-/* floating buttons */
-.floating-btn{position:fixed;bottom:15px;background:rgba(255,255,255,.15);color:#fff;border:none;padding:8px 14px;border-radius:30px;cursor:pointer;z-index:10000;backdrop-filter:blur(5px);transition:transform .15s ease,opacity .15s ease}
-.floating-btn:hover{transform:translateY(-4px) scale(1.05);opacity:.85}
-.floating-btn:active{transform:translateY(0) scale(.96)}
-#topBtn{right:120px}
-#shuffleBtn{right:20px}
-
-/* mobile tweaks */
-@media (max-width: 900px){
-  #gallery{column-count:2;padding:480px 12px 100px}
-  .filters button{margin:0 4px}
+body {
+  background: #121212;
+  color: #fff;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  margin: 0;
 }
-@media (max-width: 560px){
-  #gallery{column-count:1;padding:480px 10px 90px}
-}
-/* --- mobile/tablet responsive masonry & hero fixes --- */
 
-/* Default (desktop) stays as you have it */
+/* =======================
+   Header / Intro
+======================= */
+header {
+  text-align: center;
+  padding: 40px 0 10px;
+  position: relative;
+  z-index: 2;
+}
+
+header h1 { margin: 0; font-size: 32px; }
+header h2 { margin: 6px 0 20px; font-size: 15px; font-weight: 400; }
+
+.intro {
+  max-width: 650px;
+  margin: 0 auto 30px;
+  line-height: 1.6;
+  font-size: 14px;
+  color: #ddd;
+}
+
+/* readable text plate */
+header .text-bg {
+  display: inline-block;
+  background: rgba(0,0,0,0.35);
+  padding: 10px 20px;
+  border-radius: 8px;
+}
+
+/* filter pills */
+.filters { margin-bottom: 30px; }
+.filters button {
+  margin: 0 6px;
+  border: none;
+  padding: 6px 14px;
+  background: #2d2d2d;
+  color: #fff;
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.filters button.active { background: #fff; color: #000; }
+
+/* =======================
+   Hero (fixed behind content)
+======================= */
+.hero{
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 450px;
+  background-image: url('assets/photos/kels.png'); /* update if you rename */
+  background-size: cover;
+  background-position: center center;
+  filter: grayscale(70%) brightness(60%);
+  z-index: -1; /* sits behind header + gallery */
+}
+
+/* =======================
+   Masonry Gallery
+======================= */
 #gallery{
   column-count: 3;
   column-gap: 18px;
-  padding: 0 18px 80px;
-}
-.hero{
-  /* your desktop hero */
-  width: 100vw;
-  margin-left: calc(50% - 50vw);
-  height: 420px;
-  background-size: cover;
-  background-position: center top;
-  filter: grayscale(70%) brightness(60%);
+  /* push content down so it clears the fixed hero */
+  padding: 480px 18px 120px;
 }
 
-/* Large tablets / small laptops */
+.item{
+  break-inside: avoid;
+  margin-bottom: 18px;
+  background: #0b0b0b;     /* placeholder so blanks never look broken */
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.item img,
+.item video{
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: 8px;
+  opacity: 0;                      /* fade-in only after loaded */
+  transition: opacity .25s ease, transform .2s;
+}
+
+.item.loaded img,
+.item.loaded video{
+  opacity: 1;
+}
+
+.item:hover img,
+.item:hover video{
+  transform: translateY(-4px);
+}
+
+.item video{
+  background: #000;                /* fallback while first frame loads */
+}
+
+/* =======================
+   Lightbox
+======================= */
+#lightbox{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+#lightbox.hidden{ display: none; }
+
+#lightContentWrapper{
+  position: relative;
+  max-width: 80%;
+  max-height: 90%;
+}
+#lightContent img,
+#lightContent video{
+  max-width: 100%;
+  max-height: 100%;
+}
+
+#close{
+  position: absolute;
+  top: -35px; right: -35px;
+  background: none;
+  color: #fff;
+  font-size: 35px;
+  border: none;
+  cursor: pointer;
+}
+
+#download{
+  color: #fff;
+  margin-top: 10px;
+  font-size: 12px;
+  text-decoration: none;
+  padding: 5px 15px;
+  background: rgba(255,255,255,.12);
+  border-radius: 6px;
+}
+
+/* =======================
+   Floating Buttons
+======================= */
+.floating-btn{
+  position: fixed;
+  bottom: 15px;
+  background: rgba(255,255,255,.15);
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 30px;
+  cursor: pointer;
+  z-index: 10000;
+  backdrop-filter: blur(5px);
+  transition: transform .15s ease, opacity .15s ease;
+}
+.floating-btn:hover{ transform: translateY(-4px) scale(1.05); opacity: .85; }
+.floating-btn:active{ transform: translateY(0) scale(.96); }
+
+#topBtn{ right: 120px; }
+#shuffleBtn{ right: 20px; }
+
+/* =======================
+   Responsive
+======================= */
+/* large tablets / small laptops */
 @media (max-width: 1024px){
-  #gallery{ column-count: 3; column-gap:16px; padding:0 16px 70px; }
-  .item{ margin-bottom:16px; }
-  .hero{ height: 360px; background-position: center; }
+  #gallery{ column-count: 3; column-gap: 16px; padding: 360px 16px 90px; }
+  .item{ margin-bottom: 16px; }
+  .hero{ height: 360px; }
 }
 
-/* Tablets & big phones */
+/* tablets & big phones */
 @media (max-width: 768px){
-  #gallery{ column-count: 2; column-gap:14px; padding:0 14px 70px; }
-  .item{ margin-bottom:14px; }
-  /* stop the full-bleed trick to avoid horizontal jitter on mobile */
+  #gallery{ column-count: 2; column-gap: 14px; padding: 300px 14px 80px; }
+  .item{ margin-bottom: 14px; }
   .hero{
     width: 100%;
-    margin-left: 0;
     height: 300px;
-    background-position: center;   /* keep faces centered */
-    background-size: cover;
+    background-position: center;
   }
 }
 
-/* Small phones */
+/* small phones */
 @media (max-width: 480px){
-  #gallery{ column-count: 2; column-gap:12px; padding:0 12px 60px; }
-  .item{ margin-bottom:12px; }
-  .hero{ height: 240px; background-position: center; }
-}
-/* tile placeholder so “blank” doesn’t look broken */
-.item{
-  background:#0b0b0b;
-  border-radius:8px;
-  overflow:hidden;
-}
-
-/* fade in when loaded */
-.item img, .item video{ opacity:0; transition:opacity .25s ease; display:block; width:100%; height:auto; object-fit:cover; }
-.item.loaded img, .item.loaded video{ opacity:1; }
-
-/* --- responsive columns & hero fix --- */
-@media (max-width: 1024px){
-  #gallery{ column-count:3; column-gap:16px; padding:0 16px 70px; }
-  .hero{ height:360px; background-position:center; }
-}
-@media (max-width: 768px){
-  #gallery{ column-count:2; column-gap:14px; padding:0 14px 70px; }
-  .item{ margin-bottom:14px; }
-  /* stop full-bleed margin trick on phones */
-  .hero{ width:100% !important; margin-left:0 !important; height:300px; background-position:center; }
-}
-@media (max-width: 480px){
-  #gallery{ column-count:2; column-gap:12px; padding:0 12px 60px; }
-  .item{ margin-bottom:12px; }
-  .hero{ height:240px; }
+  #gallery{ column-count: 2; column-gap: 12px; padding: 240px 12px 70px; }
+  .item{ margin-bottom: 12px; }
+  .hero{ height: 240px; }
 }
