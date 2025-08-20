@@ -97,3 +97,10 @@ header h2{margin:6px 0 20px;font-size:15px;font-weight:400;}
   opacity: 1 !important;
   visibility: visible !important;
 }
+.item video {
+  width: 100%;
+  height: auto !important;
+  max-height: unset !important;
+  display: block !important;
+  opacity: 1 !important;
+}
