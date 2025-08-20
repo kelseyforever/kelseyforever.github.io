@@ -23,7 +23,7 @@ function load(type, list) {
       vid.preload  = "metadata";
       vid.onmouseenter = () => vid.play();
       vid.onmouseleave = () => { vid.pause(); vid.currentTime = 0; };
-
+      vid.play();
       // click → open lightbox both mobile and desktop
       vid.onclick = () => openLightbox(vid.src, "video");
 
