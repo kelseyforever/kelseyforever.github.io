@@ -27,14 +27,13 @@ header h2{margin:6px 0 20px;font-size:15px;font-weight:400;}
 
 /* ----------- hero image ------------- */
 .hero {
-  position: relative;
-  height: 380px;
-  max-height: 420px;
+  width: 100%;
+  height: 400px;              /* overall banner size */
+  background-image: url('assets/photos/kels.jpg');
   background-size: cover;
-  background-position: top center;
+  background-position: center 10%; /* keep face in frame */
   filter: grayscale(70%) brightness(60%);
 }
-
 
 /* ---------- masonry gallery ---------- */
 #gallery{
