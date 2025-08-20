@@ -16,20 +16,28 @@ function load(type, list) {
       img.loading = 'lazy';
       img.onclick = () => openLightbox(img.src, 'img');
       div.appendChild(img);
-        } else {
-      // RENDER VIDEO
-      const vid = document.createElement('video');
-      vid.src = `assets/videos/${name}`;
-      vid.muted = true;
-      vid.loop = true;
-      vid.playsInline = true;
-      vid.autoplay = false;
-      vid.onmouseenter = () => vid.play();
-      vid.onmouseleave = () => { vid.pause(); vid.currentTime = 0; };
-      vid.poster = `assets/videos/${name.replace(/\.\w+$/, '')}.jpg`; // show poster if first frame hasn't rendered
-      vid.onloadstart = () => vid.style.opacity = 1; // show once loading starts
-      div.appendChild(vid);
-    }
+       } else {
+  const vid = document.createElement('video');
+  vid.src = `assets/videos/${name}`;
+  vid.muted = true;
+  vid.loop = true;
+  vid.playsInline = true; // mobile hint
+  vid.autoplay = false;
+  vid.preload = 'metadata'; // so poster/first frame loads
+  vid.poster = `assets/videos/${name.replace(/\.\w+$/, '')}.jpg`;
+
+  // play on hover (desktop)
+  vid.onmouseenter = () => vid.play();
+  vid.onmouseleave = () => {
+    vid.pause();
+    vid.currentTime = 0;
+  };
+
+  // click → open lightbox (both desktop & mobile)
+  vid.onclick = () => openLightbox(vid.src, 'video');
+
+  div.appendChild(vid);
+}
     gallery.appendChild(div);
   });
 }
