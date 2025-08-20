@@ -27,13 +27,15 @@
   <div id="gallery"></div>
 
   <div id="lightbox" class="hidden">
-    
-    <div id="lightContentWrapper">
-      <div id="lightContent"></div>
-      <button id="close" aria-label="Close">×</button>
-      <a id="download" href="#" download>Download</a>
+  <div id="lightContentWrapper">
+    <button id="close" aria-label="Close">&times;</button>
+    <div id="lightContent"></div>
+    <div class="lb-actions">
+      <a id="download" class="lb-btn" download>Download</a>
+      <a id="openOriginal" class="lb-btn" target="_blank" rel="noopener">Open original</a>
     </div>
   </div>
+</div>
 
   <button id="shuffleBtn" class="floating-btn">🔀 Shuffle</button>
   <button id="topBtn" class="floating-btn" style="display:none">⬆️ Top</button>
