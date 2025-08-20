@@ -26,7 +26,7 @@ function load(type, list) {
       vid.autoplay = false;
       vid.onmouseenter = () => vid.play();
       vid.onmouseleave = () => { vid.pause(); vid.currentTime = 0; };
-      vid.poster = `assets/videos/${name}.jpg`; // show poster if first frame hasn't rendered
+      vid.poster = `assets/videos/${name.replace(/\.\w+$/, '')}.jpg`; // show poster if first frame hasn't rendered
       vid.onloadstart = () => vid.style.opacity = 1; // show once loading starts
       div.appendChild(vid);
     }
