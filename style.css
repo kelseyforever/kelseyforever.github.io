@@ -1,146 +1,119 @@
-/* ---------- base ---------- */
+/* ---------------- base ---------------- */
 * { box-sizing: border-box; }
-body {
-  margin: 0;
-  background:#121212;
-  color:#fff;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+body { background:#121212; color:#fff; font-family:sans-serif; margin:0; }
+
+/* keep the text sitting over the hero */
+header {
+  text-align:center;
+  padding:40px 0 10px;
+  position:relative;
+  z-index:2;
+  margin-top:-130px;       /* pulls the header up over the hero */
+}
+header h1{margin:0;font-size:32px;}
+header h2{margin:6px 0 20px;font-size:15px;font-weight:400;}
+.intro{max-width:650px;margin:0 auto 0;line-height:1.6;font-size:14px}
+
+/* translucent box behind the heading+intro */
+.text-bg{
+  display:inline-block;
+  background: rgba(0,0,0,.38);
+  padding: 12px 18px;
+  border-radius: 8px;
+  backdrop-filter: blur(2px);
 }
 
-header { text-align:center; padding:40px 0 10px; position:relative; z-index:2; }
-header h1 { margin:0; font-size:32px; }
-header h2 { margin:6px 0 20px; font-size:15px; font-weight:400; }
-.intro { max-width:650px; margin:0 auto 30px; line-height:1.6; font-size:14px; color:#ddd; }
-
-.filters { margin-bottom:30px; }
-.filters button {
-  margin:0 6px; border:none; padding:6px 14px; background:#2d2d2d;
-  color:#fff; border-radius:30px; cursor:pointer; font-size:14px;
-}
-.filters button.active { background:#fff; color:#000; }
-
-/* ---------- hero ---------- */
+/* ---------------- hero ---------------- */
+/* Make it responsive; no fixed positioning (mobile browsers hate it) */
 .hero{
   position: relative;
   width: 100%;
-  height: 320px;                    /* desktop size */
+  height: clamp(220px, 36vh, 420px);
   background-image: url('assets/photos/kels.png');
   background-size: cover;
-  background-position: center 25%;
+  background-position: center 30%; /* nudge down so faces show */
   filter: grayscale(70%) brightness(60%);
-  border-bottom: 1px solid rgba(255,255,255,.08);
+  z-index:1;
 }
 
-/* ---------- masonry gallery (CSS columns) ---------- */
+/* ---------------- filters -------------- */
+.filters{margin:18px 0 24px;}
+.filters button{
+  margin:0 6px;border:none;padding:6px 14px;background:#2d2d2d;
+  color:#fff;border-radius:30px;cursor:pointer;font-size:14px
+}
+.filters button.active{background:#fff;color:#000}
+
+/* --------------- gallery --------------- */
 #gallery{
-  column-count: 3;
-  column-gap: 18px;
-  padding: 18px;
+  column-count:3;
+  column-gap:18px;
+  padding: 0 18px 120px;
 }
-.item{
-  break-inside: avoid;
-  margin-bottom: 18px;
-  background:#0b0b0b;               /* placeholder so blanks never look broken */
-  border-radius: 8px;
-  overflow: hidden;
+.item{ break-inside:avoid; margin-bottom:18px; background:#0b0b0b; border-radius:8px; overflow:hidden; }
+
+/* fade-in when loaded */
+.item img,.item video{
+  width:100%; display:block; border-radius:8px;
+  transition:transform .2s, opacity .25s ease;
+  opacity:0;
+  object-fit:cover;
 }
-.item img,
+.item.loaded img, .item.loaded video{ opacity:1; }
+
+.item:hover img,.item:hover video{ transform:translateY(-4px); }
+
+/* video tile baseline so black frames aren’t jarring */
 .item video{
-  display:block;
-  width:100%;
-  height:auto;
-  object-fit: cover;
-  border-radius:8px;
-  transition: transform .2s;
+  background:#000;
+  /* we’ll also set a background-image via JS as a poster fallback */
 }
-/* never hide tiles via opacity—prevents “black box” look on mobile */
-#gallery .item img, #gallery .item video { opacity: 1 !important; }
 
-.item:hover img,
-.item:hover video{ transform: translateY(-4px); }
-.item video{ background:#000; }
-
-/* ---------- lightbox ---------- */
+/* --------------- lightbox -------------- */
 #lightbox{
   position:fixed; inset:0; background:rgba(0,0,0,.85);
   display:flex; justify-content:center; align-items:center; z-index:9999;
+  cursor: zoom-out;           /* click outside to close */
 }
 #lightbox.hidden{ display:none; }
 #lightContentWrapper{
-  position:relative; max-width:90vw; max-height:90vh;
-  cursor: default; /* keep pointer normal over content */
+  position:relative; max-width:80%; max-height:90%;
+  cursor: default;            /* don’t close when clicking the media itself */
 }
-#lightContent img, #lightContent video{
-  max-width:100%; max-height:100%; display:block;
-}
+#lightContent img,#lightContent video{ max-width:100%; max-height:100%; }
 #close{
   position:absolute; top:-35px; right:-35px; background:none;
   color:#fff; font-size:35px; border:none; cursor:pointer;
 }
-
-/* action buttons in lightbox */
-.lb-actions{
-  position: absolute;
-  right: .5rem;
-  bottom: .5rem;
-  display: flex;
-  gap: 8px;
+#download{
+  color:#fff; margin-top:10px; font-size:12px; text-decoration:none;
+  padding:5px 15px; background:rgba(255,255,255,.12); border-radius:6px;
 }
-.lb-btn{
-  display: inline-block;
-  color: #fff;
-  text-decoration: none;
-  font-size: 13px;
-  padding: 6px 10px;
-  border-radius: 6px;
-  background: rgba(255,255,255,0.18);
-  backdrop-filter: blur(4px);
-}
-.lb-btn:hover{ background: rgba(255,255,255,0.28); }
 
-/* lightbox cursors */
-#lightbox { cursor: zoom-out; }
-
-/* ---------- floating buttons ---------- */
+/* ---------- floating buttons ----------- */
 .floating-btn{
   position:fixed; bottom:15px; background:rgba(255,255,255,.15);
-  color:#fff; border:none; padding:8px 14px; border-radius:30px;
-  cursor:pointer; z-index:10000; backdrop-filter:blur(5px);
-  transition: transform .15s ease, opacity .15s ease;
+  color:#fff; border:none; padding:8px 14px; border-radius:30px; cursor:pointer;
+  z-index:10000; backdrop-filter:blur(5px);
+  transition:transform .15s ease, opacity .15s ease;
 }
 .floating-btn:hover{ transform: translateY(-4px) scale(1.05); opacity:.85; }
 .floating-btn:active{ transform: translateY(0) scale(.96); }
-#topBtn{ right:120px; }
-#shuffleBtn{ right:20px; }
+#topBtn{right:120px;} #shuffleBtn{right:20px;}
 
-/* ---------- responsive ---------- */
-/* tablets */
+/* -------------- responsive ------------- */
 @media (max-width:1024px){
-  .hero{
-    height: 280px;
-    background-position: center 30%;
-    background-size: cover;
-  }
-  /* keep your gallery rules */
-  #gallery{ column-count:3; column-gap:16px; padding:16px; }
+  #gallery{ column-count:3; column-gap:16px; padding:0 16px 100px; }
+  .hero{ height: 360px; background-position:center 28%; }
+  header{ margin-top:-120px; }
 }
-
-/* small tablets / big phones */
 @media (max-width:768px){
-  .hero{
-    height: 240px;
-    background-position: center 30%;
-    background-size: cover;
-  }
-  #gallery{ column-count:2; column-gap:14px; padding:14px; }
+  #gallery{ column-count:2; column-gap:14px; padding:0 14px 90px; }
+  .hero{ height: 280px; background-position:center 32%; }
+  header{ margin-top:-105px; }
 }
-
-/* phones */
 @media (max-width:480px){
-  .hero{
-    height: 210px;
-    background-position: center 38%;
-    background-size: cover;
-  }
-  #gallery{ column-count:2; column-gap:12px; padding:12px; }
+  #gallery{ column-count:2; column-gap:12px; padding:0 12px 80px; }
+  .hero{ height: 240px; background-position:center 35%; }
+  header{ margin-top:-92px; }
 }
