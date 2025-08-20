@@ -53,20 +53,32 @@ header h2{margin:6px 0 20px;font-size:15px;font-weight:400;}
 .item{ break-inside:avoid; margin-bottom:18px; background:#0b0b0b; border-radius:8px; overflow:hidden; }
 
 /* fade-in when loaded */
-.item img,.item video{
-  width:100%; display:block; border-radius:8px;
-  transition:transform .2s, opacity .25s ease;
-  opacity:0;
+.item img,
+.item video{
+  width:100%;
+  display:block;
+  border-radius:8px;
+  transition: transform .2s, opacity .25s ease;
+  opacity:0;                 /* start hidden */
   object-fit:cover;
 }
-.item.loaded img, .item.loaded video{ opacity:1; }
 
-.item:hover img,.item:hover video{ transform:translateY(-4px); }
+/* show once loaded – supports both patterns */
+.item.loaded img,
+.item.loaded video,
+.item img.loaded,
+.item video.loaded{
+  opacity:1;
+}
 
-/* video tile baseline so black frames aren’t jarring */
+.item:hover img,
+.item:hover video{
+  transform: translateY(-4px);
+}
+
+/* video tile baseline so first frame/ poster blends in */
 .item video{
   background:#000;
-  /* we’ll also set a background-image via JS as a poster fallback */
 }
 
 /* --------------- lightbox -------------- */
