@@ -1,4 +1,4 @@
-/* ------------ base styles ------------ */
+/* ========== Base Styles ========== */
 body {
   background:#121212;
   color:#fff;
@@ -25,16 +25,16 @@ header h2{margin:6px 0 20px;font-size:15px;font-weight:400;}
 }
 .filters button.active{background:#fff;color:#000;}
 
-/* ----------- hero image ------------- */
+/* ---------- hero ---------- */
 .hero {
-  position: relative;
-  width: 100vw;                              /* stretch entire screen */
-  margin-left: calc(50% - 50vw);             /* break out of centered page container */
-  height: 420px;                             /* adjust this height to taste */
-  background-image: url('assets/photos/kels.png'); /* make sure name matches file */
-  background-size: cover;
-  background-position: center top;
-  filter: grayscale(70%) brightness(60%);
+  position:relative;
+  width:100vw;
+  margin-left:calc(50% - 50vw);
+  height:420px;
+  background-image:url('assets/photos/kels.png');
+  background-size:cover;
+  background-position:center top;
+  filter:grayscale(70%) brightness(60%);
 }
 
 /* ---------- masonry gallery ---------- */
@@ -47,7 +47,8 @@ header h2{margin:6px 0 20px;font-size:15px;font-weight:400;}
   break-inside:avoid;
   margin-bottom:18px;
 }
-.item img,.item video{
+.item img,
+.item video{
   width:100%;
   display:block;
   border-radius:8px;
@@ -55,17 +56,24 @@ header h2{margin:6px 0 20px;font-size:15px;font-weight:400;}
   opacity:0;
 }
 .item img.loaded{opacity:1;}
-.item:hover img,.item:hover video{transform:translateY(-4px);}
+.item:hover img,
+.item:hover video{transform:translateY(-4px);}
+.item video{
+  opacity:1;             /* ensure visible */
+  height:auto;
+  object-fit:cover;
+  background:#000;
+}
 
-
-/* --------- lightbox ----------*/
+/* -------- lightbox ----------*/
 #lightbox{
   position:fixed;inset:0;background:rgba(0,0,0,.85);
   display:flex;justify-content:center;align-items:center;z-index:9999;
 }
 #lightbox.hidden{display:none;}
 #lightContentWrapper{position:relative;max-width:80%;max-height:90%;}
-#lightContent img,#lightContent video{max-width:100%;max-height:100%;}
+#lightContent img,
+#lightContent video{max-width:100%;max-height:100%;}
 #close{
   position:absolute;top:-25px;right:-25px;background:none;
   color:#fff;font-size:30px;border:none;cursor:pointer;
@@ -75,58 +83,17 @@ header h2{margin:6px 0 20px;font-size:15px;font-weight:400;}
   padding:5px 15px;background:rgba(255,255,255,.12);border-radius:6px;
 }
 
-/* ------- floating buttons -------- */
+/* -------- floating buttons -------- */
 .floating-btn{
   position:fixed;bottom:15px;background:rgba(255,255,255,.15);
   color:#fff;border:none;padding:8px 14px;border-radius:30px;cursor:pointer;
   z-index:10000;backdrop-filter:blur(5px);
+  transition:transform 0.15s ease, opacity 0.15s ease;
 }
+.floating-btn:hover{
+  transform:translateY(-4px) scale(1.05);
+  opacity:.85;
+}
+.floating-btn:active{transform:translateY(0) scale(.96);}
 #topBtn{right:120px;}
 #shuffleBtn{right:20px;}
-
-/* force video tiles to display in masonry mode */
-.item[data-type="video"] {
-  display: block !important;
-}
-/* Ensure videos always show in gallery and aren't hidden by filters */
-#gallery .item[data-type="video"] {
-  display: block !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-}
-
-header {
-  position: relative;
-  z-index: 2;
-}
-
-header .text-bg {
-  background: rgba(0,0,0,0.35);  /* translucent black */
-  padding: 10px 20px;
-  border-radius: 6px;
-  display: inline-block;
-}
-.floating-btn {
-  transition: transform 0.15s ease, opacity 0.15s ease;
-}
-
-.floating-btn:hover {
-  transform: translateY(-4px) scale(1.05);
-  opacity: 0.85;
-}
-
-.floating-btn:active {
-  transform: translateY(0) scale(0.96);
-}
-
-
-/* Force videos in the gallery to actually show (fix for GitHub Pages) */
-.item video {
-  width: 100% !important;
-  height: auto !important;
-  display: block !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  object-fit: cover !important;
-  background: #000 !important;
-}
