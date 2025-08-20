@@ -1,5 +1,5 @@
 {
-  "public": "public",
-  "cleanUrls": false,
-  "trailingSlash": true
+  "rewrites": [
+    { "source": "/", "destination": "/public/index.html" }
+  ]
 }
