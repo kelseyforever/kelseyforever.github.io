@@ -16,17 +16,19 @@ function load(type, list) {
       img.loading = 'lazy';
       img.onclick = () => openLightbox(img.src, 'img');
       div.appendChild(img);
-    } else {
-     const vid = document.createElement('video');
-vid.src = `assets/videos/${name}#t=0.1`;
-vid.poster = `assets/videos/${name}.jpg`;
-vid.muted = true;
-vid.preload = "none";                  // <– ensures poster shows instead of black box
-vid.setAttribute('playsinline', '');   // <– fixes mobile weirdness
-vid.onmouseenter = () => vid.play();
-vid.onmouseleave = () => vid.pause();
-vid.onclick = () => openLightbox(vid.src, 'video');
-div.appendChild(vid);
+        } else {
+      // RENDER VIDEO
+      const vid = document.createElement('video');
+      vid.src = `assets/videos/${name}`;
+      vid.muted = true;
+      vid.loop = true;
+      vid.playsInline = true;
+      vid.autoplay = false;
+      vid.onmouseenter = () => vid.play();
+      vid.onmouseleave = () => { vid.pause(); vid.currentTime = 0; };
+      vid.poster = `assets/videos/${name}.jpg`; // show poster if first frame hasn't rendered
+      vid.onloadstart = () => vid.style.opacity = 1; // show once loading starts
+      div.appendChild(vid);
     }
     gallery.appendChild(div);
   });
