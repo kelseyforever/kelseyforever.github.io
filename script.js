@@ -48,6 +48,22 @@ async function getJSON(url){
     return [];
   }
 }
+// Try multiple poster filename variants, return the first that exists.
+async function resolvePosterFor(name) {
+  const base = String(name).split('.').slice(0,-1).join('.');
+  const candidates = [
+    `${base}.jpg`,
+    `${base}.JPG`,
+    `${base.toLowerCase()}.jpg`
+  ];
+  for (const file of candidates) {
+    try {
+      const r = await fetch(`assets/videos/${file}`, { method:'HEAD', cache:'no-store' });
+      if (r.ok) return `assets/videos/${file}`;
+    } catch (_) {}
+  }
+  return ''; // none found
+}
 
 /* -------- tile builders -------- */
 function addPhoto(name){
@@ -65,17 +81,32 @@ function addPhoto(name){
   gallery.appendChild(div);
 }
 
-function addVideo(name){
+async function addVideo(name){
   const div = document.createElement('div');
   div.className='item'; div.dataset.type='video';
 
-  const base = String(name).split('.').slice(0,-1).join('.'); // safe even with multiple dots
   const vid  = document.createElement('video');
   vid.src    = `assets/videos/${name}`;
-  vid.poster = `assets/videos/${base}.jpg`;  // must exist for non-black tile
   vid.muted = true; vid.loop = true; vid.playsInline = true;
   vid.autoplay = true; vid.preload = 'metadata';
-  vid.onerror  = () => { vid.style.opacity=1; };
+  vid.style.background = '#000';
+
+  // find a poster that actually exists
+  resolvePosterFor(name).then(poster => {
+    if (poster) vid.poster = poster;
+  });
+
+  // force-paint a frame in engines that show black until seek
+  vid.addEventListener('loadedmetadata', () => {
+    // tiny seek then pause draws a frame without starting playback noise
+    try { vid.currentTime = 0.001; } catch(_) {}
+  });
+  vid.addEventListener('canplay', () => {
+    // if it painted a black frame, a quick pause/play nudge helps sometimes
+    vid.pause(); 
+    requestAnimationFrame(() => vid.play());
+  });
+
   vid.onmouseenter = () => vid.play();
   vid.onmouseleave = () => { vid.pause(); vid.currentTime = 0; };
   vid.onclick = () => openLightbox(vid.src,'video');
