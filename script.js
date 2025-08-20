@@ -211,7 +211,26 @@
     // sanity
     console.log(`Rendered: ${photos.length} photos + ${videos.length} videos = ${items.length} tiles`);
   }
+// (re)bind click-outside, X button, and Esc-to-close even if the DOM was present before
+(function wireLightbox(){
+  const lb    = document.getElementById('lightbox');
+  const wrap  = document.getElementById('lightContentWrapper');
+  const close = document.getElementById('close');
+  if (!lb || !wrap || !close) return; // if created dynamically, openLightbox() will also wire
 
+  // click outside content closes
+  lb.addEventListener('click', (e) => {
+    if (!wrap.contains(e.target)) closeLightbox();
+  });
+
+  // X closes
+  close.addEventListener('click', closeLightbox);
+
+  // Esc closes
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeLightbox();
+  });
+})();
   /* ---------- controls & filters ---------- */
 
   // shuffle button
