@@ -29,15 +29,11 @@ header h2{margin:6px 0 20px;font-size:15px;font-weight:400;}
 .hero{
   position:relative;
   height:540px;
-  overflow:hidden;
-}
-.hero img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  object-position:center; /* <-- keeps her face centered */
+  background-size:cover;
+  background-position:center;
   filter: grayscale(70%) brightness(60%);
 }
+
 
 /* ---------- masonry gallery ---------- */
 #gallery{
@@ -85,3 +81,8 @@ header h2{margin:6px 0 20px;font-size:15px;font-weight:400;}
 }
 #topBtn{right:120px;}
 #shuffleBtn{right:20px;}
+
+/* make sure video blocks are visible in column layout */
+.item[data-type="video"] {
+  display: block !important;
+}
