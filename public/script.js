@@ -88,9 +88,13 @@ function bindFilters(){
       filters.forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
       const t=btn.dataset.type;
-      document.querySelectorAll('#gallery .item').forEach(it=>{
-        it.style.display=(t==='all'|| it.dataset.type===t)?'block':'none';
-      });
+      document.querySelectorAll('#gallery .item').forEach(it => {
+       if (t === 'all') {
+         it.style.display = 'block';
+          } else {
+          it.style.display = (it.dataset.type === t ? 'block' : 'none');
+        }
+     });
     }
   });
 }
