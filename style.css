@@ -129,3 +129,19 @@ header h2{margin:6px 0 20px;font-size:15px;font-weight:400;}
   .hero{ height: 240px; background-position:center 35%; }
   header{ margin-top:-92px; }
 }
+/* --- Emergency: always show media; fade only on hover --- */
+#gallery .item img,
+#gallery .item video{
+  opacity: 1 !important;
+  transition: transform .2s ease;   /* no opacity gating */
+}
+
+/* keep the hover lift */
+#gallery .item:hover img,
+#gallery .item:hover video{ transform: translateY(-4px); }
+
+/* video baseline so first frame blends in while loading */
+#gallery .item video{ background:#000; }
+
+/* make sure nothing is blocking mouse events */
+#gallery .item{ pointer-events:auto; }
