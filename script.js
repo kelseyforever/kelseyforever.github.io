@@ -17,10 +17,12 @@ function load(type, list) {
       img.onclick = () => openLightbox(img.src, 'img');
       div.appendChild(img);
     } else {
-      const vid = document.createElement('video');
+     const vid = document.createElement('video');
       vid.src = `assets/videos/${name}#t=0.1`;
       vid.muted = true;
       vid.poster = `assets/videos/${name}.jpg`;
+      vid.preload = "none";           // <---- NEW
+      vid.setAttribute('playsinline','');  // <---- NEW
       vid.onmouseenter = () => vid.play();
       vid.onmouseleave = () => vid.pause();
       vid.onclick       = () => openLightbox(vid.src, 'video');
