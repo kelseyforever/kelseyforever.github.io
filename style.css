@@ -114,15 +114,33 @@ header h2 { margin:6px 0 20px; font-size:15px; font-weight:400; }
 #shuffleBtn{ right:20px; }
 
 /* ---------- responsive ---------- */
+/* tablets */
 @media (max-width:1024px){
-  .hero{ height:280px; background-position:center 30%; }
+  .hero{
+    height: 280px;
+    background-position: center 30%;
+    background-size: cover;
+  }
+  /* keep your gallery rules */
   #gallery{ column-count:3; column-gap:16px; padding:16px; }
 }
+
+/* small tablets / big phones */
 @media (max-width:768px){
-  .hero{ height:240px; background-position:center; }
+  .hero{
+    height: 240px;
+    background-position: center 30%;
+    background-size: cover;
+  }
   #gallery{ column-count:2; column-gap:14px; padding:14px; }
 }
+
+/* phones */
 @media (max-width:480px){
-  .hero{ height:210px; }
+  .hero{
+    height: 210px;
+    background-position: center 38%;
+    background-size: cover;
+  }
   #gallery{ column-count:2; column-gap:12px; padding:12px; }
 }
