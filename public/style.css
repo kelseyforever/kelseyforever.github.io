@@ -56,7 +56,7 @@ header h2{margin:6px 0 20px;font-size:15px;font-weight:400;}
 }
 .item img.loaded{opacity:1;}
 .item:hover img,.item:hover video{transform:translateY(-4px);}
-.item video{height:auto;}
+
 
 /* --------- lightbox ----------*/
 #lightbox{
@@ -84,10 +84,6 @@ header h2{margin:6px 0 20px;font-size:15px;font-weight:400;}
 #topBtn{right:120px;}
 #shuffleBtn{right:20px;}
 
-/* make sure video blocks are visible in column layout */
-.item[data-type="video"] {
-  display: block !important;
-}
 /* force video tiles to display in masonry mode */
 .item[data-type="video"] {
   display: block !important;
@@ -98,13 +94,7 @@ header h2{margin:6px 0 20px;font-size:15px;font-weight:400;}
   opacity: 1 !important;
   visibility: visible !important;
 }
-.item video {
-  width: 100%;
-  height: auto !important;
-  max-height: unset !important;
-  display: block !important;
-  opacity: 1 !important;
-}
+
 header {
   position: relative;
   z-index: 2;
@@ -127,4 +117,17 @@ header .text-bg {
 
 .floating-btn:active {
   transform: translateY(0) scale(0.96);
+}
+
+
+/* ensures the video has a starting frame visible */
+.item video::-webkit-media-controls-start-playback-button {
+  display:none !important;
+}
+.item video {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  background: #000;
 }
