@@ -105,3 +105,26 @@ header h2{margin:6px 0 20px;font-size:15px;font-weight:400;}
   display: block !important;
   opacity: 1 !important;
 }
+header {
+  position: relative;
+  z-index: 2;
+}
+
+header .text-bg {
+  background: rgba(0,0,0,0.35);  /* translucent black */
+  padding: 10px 20px;
+  border-radius: 6px;
+  display: inline-block;
+}
+.floating-btn {
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.floating-btn:hover {
+  transform: translateY(-4px) scale(1.05);
+  opacity: 0.85;
+}
+
+.floating-btn:active {
+  transform: translateY(0) scale(0.96);
+}
