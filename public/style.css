@@ -86,3 +86,7 @@ header h2{margin:6px 0 20px;font-size:15px;font-weight:400;}
 .item[data-type="video"] {
   display: block !important;
 }
+/* force video tiles to display in masonry mode */
+.item[data-type="video"] {
+  display: block !important;
+}
