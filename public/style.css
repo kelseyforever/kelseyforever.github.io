@@ -31,7 +31,7 @@ header h2{margin:6px 0 20px;font-size:15px;font-weight:400;}
   width: 100vw;                              /* stretch entire screen */
   margin-left: calc(50% - 50vw);             /* break out of centered page container */
   height: 420px;                             /* adjust this height to taste */
-  background-image: url('assets/photos/kels.jpg'); /* make sure name matches file */
+  background-image: url('assets/photos/kels.png'); /* make sure name matches file */
   background-size: cover;
   background-position: center top;
   filter: grayscale(70%) brightness(60%);
