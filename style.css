@@ -1,207 +1,123 @@
-/* =======================
-   Base
-======================= */
-* { box-sizing: border-box; }
-
-body {
-  background: #121212;
-  color: #fff;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-  margin: 0;
+/* HERO SECTION STYLES */
+#hero, .hero-section, .hero {  /* adapt selector to actual hero element ID/class */
+  max-height: 80vh;             /* limit hero to 80% of viewport height */
+  min-height: 300px;            /* ensure hero is at least tall enough for content */
+  overflow: hidden;             /* hide overflow (if image is taller) */
+  background-position: center center;
+  background-size: cover;
+  /* If hero uses an <img>, you might instead do:
+     width: 100%;
+     height: auto;
+     display: block;
+     object-fit: cover; */
 }
 
-/* =======================
-   Header / Intro
-======================= */
-header {
-  text-align: center;
-  padding: 40px 0 10px;
+/* GALLERY GRID STYLES */
+/* (assuming a basic grid or flex layout for thumbnails) */
+.gallery-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  /* add any gap or padding as needed */
+}
+.tile {
   position: relative;
-  z-index: 2;
+  margin: 5px;
+  overflow: hidden;
+  /* ensure all tiles are consistently sized, e.g.: */
+  width: 200px;
+  height: 200px;
+}
+.tile img, .tile video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  /* Ensure video and img fill the tile area and crop appropriately */
 }
 
-header h1 { margin: 0; font-size: 32px; }
-header h2 { margin: 6px 0 20px; font-size: 15px; font-weight: 400; }
-
-.intro {
-  max-width: 650px;
-  margin: 0 auto 30px;
-  line-height: 1.6;
-  font-size: 14px;
-  color: #ddd;
+/* Ensure videos appear the same as images in grid */
+.tile video {
+  background: #000;       /* black background behind video (for aspect ratio before frame loads) */
+  /* Remove default controls UI on the thumbnail videos */
+  display: block;
 }
 
-/* readable text plate */
-header .text-bg {
-  display: inline-block;
-  background: rgba(0,0,0,0.35);
-  padding: 10px 20px;
-  border-radius: 8px;
+/* HOVER EFFECTS */
+.tile:hover video {
+  /* If we want to indicate hover, e.g., by brightening video or adding a play icon, we could do:
+  filter: brightness(1.1);
+  */
+}
+.tile:hover img {
+  /* e.g., maybe slight zoom on hover for images */
 }
 
-/* filter pills */
-.filters { margin-bottom: 30px; }
-.filters button {
-  margin: 0 6px;
-  border: none;
-  padding: 6px 14px;
-  background: #2d2d2d;
-  color: #fff;
-  border-radius: 30px;
-  cursor: pointer;
-  font-size: 14px;
-}
-.filters button.active { background: #fff; color: #000; }
-
-/* =======================
-   Hero (fixed behind content)
-======================= */
-.hero{
+/* LIGHTBOX STYLES */
+#lightbox {
+  display: none;                  /* hidden by default */
   position: fixed;
   top: 0; left: 0;
-  width: 100%;
-  height: 450px;
-  background-image: url('assets/photos/kels.png'); /* update if you rename */
-  background-size: cover;
-  background-position: center center;
-  filter: grayscale(70%) brightness(60%);
-  z-index: -1; /* sits behind header + gallery */
-}
-
-/* =======================
-   Masonry Gallery
-======================= */
-#gallery{
-  column-count: 3;
-  column-gap: 18px;
-  /* push content down so it clears the fixed hero */
-  padding: 480px 18px 120px;
-}
-
-.item{
-  break-inside: avoid;
-  margin-bottom: 18px;
-  background: #0b0b0b;     /* placeholder so blanks never look broken */
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.item img,
-.item video{
-  display: block;
-  width: 100%;
-  height: auto;
-  object-fit: cover;
-  border-radius: 8px;
-  opacity: 0;                      /* fade-in only after loaded */
-  transition: opacity .25s ease, transform .2s;
-}
-
-.item.loaded img,
-.item.loaded video{
-  opacity: 1;
-}
-
-.item:hover img,
-.item:hover video{
-  transform: translateY(-4px);
-}
-
-.item video{
-  background: #000;                /* fallback while first frame loads */
-}
-
-/* =======================
-   Lightbox
-======================= */
-#lightbox{
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.85);
-  display: flex;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.8);    /* semi-transparent black background */
   justify-content: center;
   align-items: center;
   z-index: 9999;
 }
-#lightbox.hidden{ display: none; }
-
-#lightContentWrapper{
+#lightbox.active {                /* class to activate display */
+  display: flex;
+}
+#lightbox .content {
   position: relative;
-  max-width: 80%;
+  max-width: 90%;
   max-height: 90%;
 }
-#lightContent img,
-#lightContent video{
+#lightbox img, #lightbox video {
   max-width: 100%;
   max-height: 100%;
+  display: block;
 }
-
-#close{
+#lightbox video {
+  outline: none;
+}
+#lightbox .close {
   position: absolute;
-  top: -35px; right: -35px;
-  background: none;
+  top: 20px;
+  right: 30px;
+  font-size: 40px;
+  font-family: sans-serif;
   color: #fff;
-  font-size: 35px;
-  border: none;
   cursor: pointer;
 }
-
-#download{
+#lightbox .download-link {
+  position: absolute;
+  bottom: 20px;
+  right: 30px;
   color: #fff;
-  margin-top: 10px;
-  font-size: 12px;
   text-decoration: none;
-  padding: 5px 15px;
-  background: rgba(255,255,255,.12);
-  border-radius: 6px;
+  font-size: 16px;
+  background: rgba(0,0,0,0.5);
+  padding: 8px 12px;
+  border-radius: 4px;
+}
+#lightbox .download-link:hover {
+  background: rgba(255,255,255,0.3);
 }
 
-/* =======================
-   Floating Buttons
-======================= */
-.floating-btn{
-  position: fixed;
-  bottom: 15px;
-  background: rgba(255,255,255,.15);
-  color: #fff;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 30px;
-  cursor: pointer;
-  z-index: 10000;
-  backdrop-filter: blur(5px);
-  transition: transform .15s ease, opacity .15s ease;
-}
-.floating-btn:hover{ transform: translateY(-4px) scale(1.05); opacity: .85; }
-.floating-btn:active{ transform: translateY(0) scale(.96); }
-
-#topBtn{ right: 120px; }
-#shuffleBtn{ right: 20px; }
-
-/* =======================
-   Responsive
-======================= */
-/* large tablets / small laptops */
-@media (max-width: 1024px){
-  #gallery{ column-count: 3; column-gap: 16px; padding: 360px 16px 90px; }
-  .item{ margin-bottom: 16px; }
-  .hero{ height: 360px; }
-}
-
-/* tablets & big phones */
-@media (max-width: 768px){
-  #gallery{ column-count: 2; column-gap: 14px; padding: 300px 14px 80px; }
-  .item{ margin-bottom: 14px; }
-  .hero{
-    width: 100%;
-    height: 300px;
-    background-position: center;
+/* RESPONSIVE TWEAKS */
+/* Ensure gallery tiles adjust on smaller screens */
+@media (max-width: 600px) {
+  .tile {
+    width: 45vw;
+    height: 45vw;  /* make tiles size relative to viewport width on small screens for responsiveness */
   }
-}
-
-/* small phones */
-@media (max-width: 480px){
-  #gallery{ column-count: 2; column-gap: 12px; padding: 240px 12px 70px; }
-  .item{ margin-bottom: 12px; }
-  .hero{ height: 240px; }
+  #lightbox .close {
+    font-size: 30px;
+    top: 10px; right: 15px;
+  }
+  #lightbox .download-link {
+    font-size: 14px;
+    bottom: 10px; right: 15px;
+    padding: 6px 10px;
+  }
 }
