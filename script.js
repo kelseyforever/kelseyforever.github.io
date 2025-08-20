@@ -19,7 +19,7 @@ function load(type, list) {
       vid.muted = true;
       vid.loop  = true;
       vid.playsInline = true;
-      vid.autoplay = false;
+      vid.autoplay = true;
       vid.preload  = "metadata";
       vid.onmouseenter = () => vid.play();
       vid.onmouseleave = () => { vid.pause(); vid.currentTime = 0; };
