@@ -126,8 +126,9 @@ header .text-bg {
 }
 .item video {
   width: 100%;
-  height: auto;
-  object-fit: contain;
+  height: auto;        /* keep natural height */
+  object-fit: cover;   /* crop edge-fill like photos */
   display: block;
-  background: #000;
+  border-radius: 8px;
+  background: #000;    /* fallback */
 }
