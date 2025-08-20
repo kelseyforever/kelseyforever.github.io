@@ -124,11 +124,13 @@ header .text-bg {
 .item video::-webkit-media-controls-start-playback-button {
   display:none !important;
 }
+/* --- fix GitHub Pages video thumbnails in masonry --- */
 .item video {
-  width: 100%;
-  height: auto;        /* keep natural height */
-  object-fit: cover;   /* crop edge-fill like photos */
-  display: block;
-  border-radius: 8px;
-  background: #000;    /* fallback */
+  width: 100% !important;
+  height: auto !important;
+  display: block !important;
+  object-fit: cover !important;  /* change to 'contain' if you prefer full frame */
+  opacity: 1 !important;
+  visibility: visible !important;
+  background: #000 !important;   /* fallback color */
 }
