@@ -1,213 +1,184 @@
-// --- helpers ---------------------------------------------------------------
-const $ = (sel) => document.querySelector(sel);
-const gallery = $('#gallery');
-const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+// Assuming we have arrays of media items. Let's say:
+const photos = [ /* ... list of photo file URLs or objects ... */ ];
+const videos = [ /* ... list of video file URLs or objects ... */ ];
 
-// normalize names so "IMG_0001.JPG", "img_0001.jpg", "img_0001 (copy).jpg" de-dupe
-const normalize = (name) =>
-  name
-    .trim()
-    .toLowerCase()
-    .replace(/\.(jpe?g|png|heic|mp4|mov)$/i, '')
-    .replace(/\s*\(copy(?:\s*\d+)?\)|\s*copy(?:\s*\d+)?$/i, '')
-    .replace(/\s+/g, ' ');
+// Get references to DOM elements (assuming these IDs/classes in HTML)
+const galleryContainer = document.querySelector('.gallery-container');
+const filterAllBtn = document.getElementById('filter-all');
+const filterPhotosBtn = document.getElementById('filter-photos');
+const filterVideosBtn = document.getElementById('filter-videos');
+const shuffleBtn = document.getElementById('shuffle-btn');
 
-// de-dupe list by normalized base name
-const dedupe = (list) => {
-  const seen = new Set();
-  return list.filter((n) => {
-    const key = normalize(n);
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-};
+// State to track current filter
+let currentFilter = 'all';
 
-// Fisher–Yates
-const shuffle = (a) => {
-  for (let i = a.length - 1; i > 0; i--) {
+// Utility: Shuffle an array in-place (Fisher-Yates shuffle)
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
+    [arr[i], arr[j]] = [arr[j], arr[i]];
   }
-  return a;
-};
-
-// interleave so videos don’t clump at bottom
-const interleave = (photos, videos) => {
-  const items = [];
-  const max = Math.max(photos.length, videos.length);
-  for (let i = 0; i < max; i++) {
-    if (photos[i]) items.push({ type: 'photo', name: photos[i] });
-    if (videos[i]) items.push({ type: 'video', name: videos[i] });
-  }
-  return items;
-};
-
-// --- lightbox --------------------------------------------------------------
-function ensureLightbox() {
-  if ($('#lightbox')) return;
-  const html = `
-  <div id="lightbox" class="lb hidden">
-    <div class="lb__inner">
-      <button id="lbClose" class="lb__close" aria-label="Close">×</button>
-      <div id="lbContent" class="lb__content"></div>
-      <a id="lbDL" class="lb__dl" download>Download</a>
-    </div>
-  </div>`;
-  document.body.insertAdjacentHTML('beforeend', html);
-  $('#lbClose').onclick = () => $('#lightbox').classList.add('hidden');
-  $('#lightbox').onclick = (e) => {
-    if (e.target.id === 'lightbox') $('#lightbox').classList.add('hidden');
-  };
-}
-function openLightbox(kind, src) {
-  ensureLightbox();
-  const lb = $('#lightbox');
-  const box = $('#lbContent');
-  const dl = $('#lbDL');
-  box.innerHTML = '';
-  if (kind === 'img') {
-    const img = document.createElement('img');
-    img.src = src;
-    box.appendChild(img);
-  } else {
-    const v = document.createElement('video');
-    v.src = src;
-    v.controls = true;
-    v.autoplay = true;
-    v.playsInline = true;
-    box.appendChild(v);
-  }
-  dl.href = src;
-  lb.classList.remove('hidden');
 }
 
-// --- tile builders ---------------------------------------------------------
-function makePhoto(name) {
-  const div = document.createElement('div');
-  div.className = 'item';
-  div.dataset.type = 'photo';
+// Render gallery based on current filter and given order of items
+function renderGallery(items) {
+  galleryContainer.innerHTML = '';  // clear existing tiles
 
-  const img = document.createElement('img');
-  img.loading = 'lazy';
-  img.src = `assets/photos/${name}`;
-  img.alt = name;
-  img.onload = () => img.classList.add('loaded');
-  img.onclick = () => openLightbox('img', img.src);
-
-  div.appendChild(img);
-  return div;
-}
-
-function makeVideo(name) {
-  // base name for poster: foo.mp4 -> foo.jpg
-  const base = name.replace(/\.[^/.]+$/, '');
-  const src = `assets/videos/${name}`;
-  const poster = `assets/videos/${base}.jpg`;
-
-  const div = document.createElement('div');
-  div.className = 'item';
-  div.dataset.type = 'video';
-
-  // 1) ALWAYS show poster <img> (never black)
-  const thumb = document.createElement('img');
-  thumb.className = 'thumb';
-  thumb.loading = 'lazy';
-  thumb.src = poster;
-  thumb.alt = base;
-  div.appendChild(thumb);
-
-  // 2) create <video> only when needed (hover/click) to avoid iOS limits
-  let videoEl = null;
-  let ready = false;
-
-  const ensureVideo = () => {
-    if (videoEl) return videoEl;
-    videoEl = document.createElement('video');
-    videoEl.src = src;
-    videoEl.muted = true;
-    videoEl.loop = true;
-    videoEl.playsInline = true;
-    videoEl.preload = 'metadata';
-    videoEl.style.display = 'none';
-    // when the first frame is ready, swap in
-    videoEl.addEventListener('canplay', () => {
-      ready = true;
-      thumb.style.display = 'none';
-      videoEl.style.display = 'block';
-    }, { once: true });
-    div.appendChild(videoEl);
-    return videoEl;
-  };
-
-  // Desktop hover preview
-  if (!isMobile) {
-    div.addEventListener('mouseenter', () => {
-      const v = ensureVideo();
-      const p = v.play();
-      if (p && p.catch) p.catch(() => {}); // ignore aborted play
-    });
-    div.addEventListener('mouseleave', () => {
-      if (!videoEl) return;
-      videoEl.pause();
-      videoEl.currentTime = 0;
-      videoEl.style.display = 'none';
-      thumb.style.display = 'block';
-    });
-  }
-
-  // Click = open lightbox (both desktop & mobile)
-  div.addEventListener('click', () => openLightbox('video', src));
-
-  // Fallback: if poster fails, keep tile visible (use a neutral bg)
-  thumb.onerror = () => { thumb.style.background = '#000'; };
-
-  return div;
-}
-
-// --- render ----------------------------------------------------------------
-async function render(shuffleAll = false) {
-  gallery.innerHTML = '';
-
-  // Load lists
-  const [photosRaw, videosRaw] = await Promise.all([
-    fetch('photos.json').then((r) => r.json()),
-    fetch('videos.json').then((r) => r.json()),
-  ]);
-
-  // de-dupe by normalized base name
-  const photos = dedupe(photosRaw);
-  const videos = dedupe(videosRaw);
-
-  // randomize each, then interleave so videos aren’t bottom-heavy
-  shuffle(photos);
-  shuffle(videos);
-  const items = interleave(photos, videos);
-  if (shuffleAll) shuffle(items);
-
-  // build tiles
-  for (const it of items) {
-    const tile = it.type === 'photo' ? makePhoto(it.name) : makeVideo(it.name);
-    gallery.appendChild(tile);
-  }
-
-  // console for sanity
-  console.log(`Rendered: ${photos.length} photos + ${videos.length} videos = ${items.length} tiles`);
-}
-
-// buttons / filters / init
-document.getElementById('shuffleBtn')?.addEventListener('click', () => render(true));
-document.getElementById('topBtn')?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-
-document.querySelectorAll('.filters button').forEach((btn) => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.filters button').forEach((b) => b.classList.remove('active'));
-    btn.classList.add('active');
-    const t = btn.dataset.type;
-    document.querySelectorAll('#gallery .item').forEach((it) => {
-      it.style.display = (t === 'all' || it.dataset.type === t) ? 'block' : 'none';
-    });
+  items.forEach(item => {
+    // Determine if item is photo or video by type or file extension
+    const isVideo = item.type === 'video' || /\.(mp4|webm|ogg)$/.test(item); 
+    // (Above, assuming item could be an object {src, type} or a filename string.)
+    // Create tile element
+    const tile = document.createElement('div');
+    tile.className = 'tile';
+    if (isVideo) {
+      // Create video element for video
+      const videoEl = document.createElement('video');
+      videoEl.src = item.src || item;              // item might be {src: "..."} or a string URL
+      videoEl.loop = true;
+      videoEl.muted = true;
+      videoEl.playsInline = true;
+      videoEl.preload = 'metadata';  // load metadata (enough to get first frame)
+      // No controls on thumb (we'll add controls in lightbox view)
+      tile.appendChild(videoEl);
+    } else {
+      // Create img element for photo
+      const imgEl = document.createElement('img');
+      imgEl.src = item.src || item;
+      imgEl.loading = 'lazy';  // use lazy loading for performance if supported
+      imgEl.alt = 'Photo';
+      tile.appendChild(imgEl);
+    }
+    galleryContainer.appendChild(tile);
   });
+
+  // After rendering all tiles, attach hover and click events
+  attachTileEvents();
+}
+
+// Attach hover (for videos) and click (for lightbox) events to tiles
+function attachTileEvents() {
+  const allTiles = document.querySelectorAll('.gallery-container .tile');
+  allTiles.forEach(tile => {
+    const mediaElem = tile.querySelector('img, video');
+    if (!mediaElem) return;
+    const isVideo = mediaElem.tagName.toLowerCase() === 'video';
+
+    // Click event for lightbox (both image and video)
+    mediaElem.addEventListener('click', e => {
+      e.stopPropagation();
+      if (isVideo) {
+        // Pause the preview if it was playing
+        mediaElem.pause();
+        openLightbox(mediaElem.currentSrc || mediaElem.src, 'video');
+      } else {
+        openLightbox(mediaElem.currentSrc || mediaElem.src, 'photo');
+      }
+    });
+
+    // Hover events (desktop only, videos only)
+    if (isVideo) {
+      // Play on hover (mouseenter), pause on leave (mouseleave)
+      tile.addEventListener('mouseenter', () => {
+        // Play the video preview (catch promise to avoid console error if interrupted)
+        mediaElem.play().catch(err => { /* silence play interruption errors */ });
+      });
+      tile.addEventListener('mouseleave', () => {
+        mediaElem.pause();
+        // Optional: reset to beginning so it previews from start next time
+        mediaElem.currentTime = 0;
+      });
+
+      // For mobile devices (no hover), you *could* add a touchstart to play, but 
+      // we'll rely on click to open lightbox instead of inline play to keep it simple.
+    }
+  });
+}
+
+// Lightbox overlay setup
+const lightbox = document.createElement('div');
+lightbox.id = 'lightbox';
+lightbox.innerHTML = `<span class="close">&times;</span><div class="content"></div>`;
+document.body.appendChild(lightbox);
+const lightboxContent = lightbox.querySelector('.content');
+const lightboxClose = lightbox.querySelector('.close');
+
+// Close lightbox on close button or backdrop click
+lightboxClose.addEventListener('click', () => { lightbox.classList.remove('active'); });
+lightbox.addEventListener('click', e => {
+  if (e.target === lightbox) {  // click outside the content
+    lightbox.classList.remove('active');
+  }
 });
 
-render();
+// Function to open lightbox with given media
+function openLightbox(src, type) {
+  lightboxContent.innerHTML = '';  // clear previous content
+  if (type === 'photo') {
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = 'Full Photo';
+    lightboxContent.appendChild(img);
+  } else if (type === 'video') {
+    const vid = document.createElement('video');
+    vid.src = src;
+    vid.controls = true;
+    vid.autoplay = true;
+    vid.playsInline = true;
+    lightboxContent.appendChild(vid);
+    // Video will autoplay with controls; user can unmute if desired
+  }
+  // Add download link
+  const downloadLink = document.createElement('a');
+  downloadLink.href = src;
+  downloadLink.download = '';  // triggers download of the same filename
+  downloadLink.textContent = 'Download';
+  downloadLink.className = 'download-link';
+  lightboxContent.appendChild(downloadLink);
+
+  // Show lightbox
+  lightbox.classList.add('active');
+}
+
+// Shuffle functionality
+function shuffleGallery() {
+  if (currentFilter === 'all') {
+    // Shuffle combined list of photos and videos
+    const combined = photos.concat(videos);
+    shuffleArray(combined);
+    renderGallery(combined);
+  } else if (currentFilter === 'photos') {
+    const photosShuffled = [...photos];
+    shuffleArray(photosShuffled);
+    renderGallery(photosShuffled);
+  } else if (currentFilter === 'videos') {
+    const videosShuffled = [...videos];
+    shuffleArray(videosShuffled);
+    renderGallery(videosShuffled);
+  }
+}
+
+// Filter button event handlers
+filterAllBtn.addEventListener('click', () => {
+  currentFilter = 'all';
+  // Render all photos + videos (in default order or shuffled state?)
+  const combined = photos.concat(videos);
+  renderGallery(combined);
+});
+filterPhotosBtn.addEventListener('click', () => {
+  currentFilter = 'photos';
+  renderGallery(photos);
+});
+filterVideosBtn.addEventListener('click', () => {
+  currentFilter = 'videos';
+  renderGallery(videos);
+});
+
+// Shuffle button handler
+shuffleBtn.addEventListener('click', () => {
+  shuffleGallery();
+});
+
+// INITIALIZE GALLERY ON PAGE LOAD
+renderGallery( photos.concat(videos) );
+console.log(`Rendered: ${photos.length} photos + ${videos.length} videos = ${photos.length + videos.length} tiles`);
