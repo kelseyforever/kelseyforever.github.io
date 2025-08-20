@@ -18,7 +18,7 @@ function load(type, list) {
       div.appendChild(img);
     } else {
       const vid = document.createElement('video');
-      vid.src = `assets/videos/${name}`;
+      vid.src = `assets/videos/${name}#t=0.1`; 
       vid.muted = true;
       vid.onmouseenter = () => vid.play();
       vid.onmouseleave = () => vid.pause();
