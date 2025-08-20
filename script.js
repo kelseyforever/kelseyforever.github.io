@@ -156,35 +156,34 @@ function closeLightbox(){
     gallery.appendChild(div);
   }
 
-  function addVideo(name) {
-    const base = name.replace(/\.\w+$/, '');
+  function addVideo(name){
+  const base = name.replace(/\.\w+$/, '');
+  const div = document.createElement('div'); div.className='item'; div.dataset.type='video';
+  const v   = document.createElement('video');
 
-    const div = document.createElement('div');
-    div.className = 'item';
-    div.dataset.type = 'video';
+  v.src    = `assets/videos/${name}#t=0.01`;
+  v.poster = `assets/videos/${base}.jpg`;
+  v.muted = true; v.loop = true; v.playsInline = true; v.preload = 'metadata';
 
-    const v = document.createElement('video');
-    v.src = `assets/videos/${name}#t=0.01`;   // nudge first frame
-    v.poster = `assets/videos/${base}.jpg`;   // jpg right next to file
-    v.muted = true;
-    v.loop = true;
-    v.playsInline = true;
-    v.preload = 'metadata';
+  // 🔹 poster-as-background fallback so the tile never looks black
+  const posterUrl = `assets/videos/${base}.jpg`;
+  v.style.backgroundImage    = `url("${posterUrl}")`;
+  v.style.backgroundSize     = 'cover';
+  v.style.backgroundPosition = 'center';
 
-    // desktop hover preview
-    v.addEventListener('mouseenter', () => safePlay(v));
-    v.addEventListener('mouseleave', () => { v.pause(); v.currentTime = 0; });
+  // desktop hover preview
+  v.onmouseenter = () => v.play().catch(()=>{});
+  v.onmouseleave = () => { v.pause(); v.currentTime = 0; };
 
-    // auto-preview when visible (mobile & desktop)
-    previewObserver.observe(v);
+  // mark visible once we have any frame
+  v.onloadeddata = () => div.classList.add('loaded');
 
-    // click → open lightbox
-    v.addEventListener('click', () => openLightbox(`assets/videos/${name}`, 'video'));
+  // click => open lightbox (works on mobile/desktop)
+  v.onclick = () => openLightbox(`assets/videos/${name}`, 'video');
 
-    div.appendChild(v);
-    gallery.appendChild(div);
-  }
-
+  div.appendChild(v);
+  gallery.appendChild(div);
+}
   /* ---------- rendering ---------- */
 
   async function render(doShuffle = false) {
