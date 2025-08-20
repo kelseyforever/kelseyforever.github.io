@@ -6,29 +6,25 @@ function load(type, list) {
     div.className = 'item';
     div.dataset.type = type;
 
-    if (type === 'photo') {
+    if(type === 'photo'){
       const img = document.createElement('img');
       img.src = `assets/photos/${name}`;
-      img.loading = "lazy";
-      img.onload = () => img.style.opacity = 1;      // make visible once loaded
+      img.loading = 'lazy';
+      img.onload = () => div.classList.add('loaded');
       img.onclick = () => openLightbox(img.src, 'img');
       div.appendChild(img);
-    } else {
+    }
+    else{
+      const base = name.replace(/\.\w+$/, '');
       const vid = document.createElement('video');
       vid.src = `assets/videos/${name}`;
-      const base = name.split('.').slice(0, -1).join('.');
       vid.poster = `assets/videos/${base}.jpg`;
-
-      vid.muted = true;
-      vid.loop = true;
-      vid.preload = "metadata";
-      vid.playsInline = true;
-      vid.autoplay = true;
+      vid.playsInline = true; vid.loop = true; vid.muted = true;
+      vid.autoplay = true; vid.preload = 'metadata';
+      vid.onloadeddata = () => div.classList.add('loaded');
       vid.onmouseenter = () => vid.play();
-      vid.onmouseleave = () => { vid.pause(); vid.currentTime = 0; };
-      vid.onloadeddata = () => vid.style.opacity = 1;
-      vid.onclick = () => openLightbox(vid.src, "video");
-
+      vid.onmouseleave = () => {vid.pause(); vid.currentTime=0;};
+      vid.onclick = () => openLightbox(vid.src, 'video');
       div.appendChild(vid);
     }
 
@@ -36,60 +32,48 @@ function load(type, list) {
   });
 }
 
-function openLightbox(src, kind) {
+function openLightbox(src, type){
   const lb = document.getElementById('lightbox');
   lb.classList.remove('hidden');
-  const c = document.getElementById('lightContent');
-  c.innerHTML = "";
-  if (kind === "img") {
-    const i = document.createElement('img');
-    i.src = src;
-    c.appendChild(i);
+  const box = document.getElementById('lightContent');
+  const dl  = document.getElementById('download');
+  box.innerHTML='';
+  if(type==='img'){
+    const i=document.createElement('img');
+    i.src=src; box.appendChild(i);
+    dl.href=src;
   } else {
-    const v = document.createElement('video');
-    v.src = src;
-    v.controls = true;
-    v.autoplay = true;
-    v.playsInline = true;
-    c.appendChild(v);
+    const v=document.createElement('video');
+    v.src=src; v.controls=true; v.autoplay=true; v.playsInline=true;
+    box.appendChild(v);
+    dl.href=src;
   }
 }
 
-// render page — if shuffle=true, mix order
-async function render(shuffle = false) {
-  gallery.innerHTML = "";
-  const p = await fetch('photos.json').then(r => r.json());
-  const v = await fetch('videos.json').then(r => r.json());
-  if (shuffle) {
-    p.sort(() => Math.random() - 0.5);
-    v.sort(() => Math.random() - 0.5);
-  }
-  load('photo', p);
-  load('video', v);
+async function render(shuffle=false){
+  gallery.innerHTML='';
+  const photos = await fetch('photos.json').then(r=>r.json());
+  const videos = await fetch('videos.json').then(r=>r.json());
+  if(shuffle){photos.sort(()=>Math.random()-.5);videos.sort(()=>Math.random()-.5);}
+  load('photo', photos);
+  load('video', videos);
 }
 
-// attach buttons
 document.getElementById('shuffleBtn').onclick = () => render(true);
-document.getElementById('topBtn').onclick = () => window.scrollTo({ top: 0, behavior: "smooth" });
-window.addEventListener('scroll', () => {
-  document.getElementById('topBtn').style.display =
-    (window.scrollY > 300) ? "block" : "none";
-});
-document.getElementById('close').onclick = () => {
-  document.getElementById('lightbox').classList.add('hidden');
-};
+document.getElementById('topBtn').onclick = () => window.scrollTo({top:0,behavior:'smooth'});
+window.onscroll=()=>document.getElementById('topBtn').style.display = (window.scrollY>300?'block':'none');
+document.getElementById('close').onclick=()=>document.getElementById('lightbox').classList.add('hidden');
 
-// filters
-document.querySelectorAll('.filters button').forEach(btn => {
-  btn.onclick = () => {
-    document.querySelectorAll('.filters button').forEach(b => b.classList.remove('active'));
+document.querySelectorAll('.filters button').forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll('.filters button').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
-    const t = btn.dataset.type;        // -> "all", "photo", or "video"
-    document.querySelectorAll('#gallery .item').forEach(it => {
-      it.style.display = (t === "all" || it.dataset.type === t) ? "block" : "none";
+    const t=btn.dataset.type;
+    document.querySelectorAll('#gallery .item').forEach(it=>{
+      it.style.display=(t==='all' || it.dataset.type===t)?'block':'none';
     });
-  };
+  }
 });
 
-// initial
+// start
 render();
