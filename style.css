@@ -1,90 +1,138 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
 body {
   margin: 0;
   padding: 0;
-  background: #1a1a1a; /* dark charcoal */
-  font-family: Arial, sans-serif;
-  color: #ddd;
+  background-color: #121212;
+  background-image: url('https://raw.githubusercontent.com/crittersmusic/kelsey-memorial-style/main/grain.png');
+  background-size: cover;
+  background-repeat: repeat;
+  font-family: 'Inter', sans-serif;
+  color: #dcdcdc;
 }
 
 header {
   text-align: center;
-  padding: 40px 15px 20px;
+  padding: 60px 20px 30px;
 }
 
-header h1 { margin-bottom: 2px; font-size: 28px; letter-spacing: 1px; }
-header h2 { margin: 0 0 20px; font-weight: normal; font-size: 16px; }
-header .intro { max-width: 600px; margin: 0 auto 25px; font-size: 14px; color: #aaa; }
-
-.filters {
-  margin-bottom: 25px;
+header h1 {
+  margin-bottom: 4px;
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: 1px;
 }
-.filters button {
-  background: none;
-  border: 1px solid #555;
+
+header h2 {
+  margin: 0 0 28px;
+  font-weight: 300;
+  font-size: 16px;
   color: #aaa;
-  margin: 0 5px;
-  padding: 6px 14px;
-  cursor: pointer;
-  border-radius: 4px;
 }
-.filters button.active {
-  background: #555;
+
+header .intro {
+  max-width: 580px;
+  margin: 0 auto 36px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #aaa;
+}
+
+.filters button {
+  background: transparent;
+  border: 1px solid #444;
+  color: #999;
+  margin: 0 8px;
+  padding: 6px 18px;
+  cursor: pointer;
+  border-radius: 20px;
+  letter-spacing: 0.4px;
+  font-size: 13px;
+  transition: 0.2s;
+}
+
+.filters button.active,
+.filters button:hover {
+  background: #444;
   color: #fff;
 }
 
 #gallery {
   column-count: 4;
-  column-gap: 15px;
-  padding: 0 20px;
+  column-gap: 25px;
+  padding: 0 40px 80px;
 }
-@media(max-width:900px){ #gallery{ column-count:3; } }
-@media(max-width:600px){ #gallery{ column-count:2; } }
+
+@media(max-width: 1000px) { #gallery{ column-count: 3; } }
+@media(max-width: 700px) { #gallery{ column-count: 2; } }
 
 .item {
-  margin-bottom: 15px;
+  margin-bottom: 25px;
   break-inside: avoid;
 }
 
 .item img,
 .item video {
   width: 100%;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+  transition: transform 0.2s;
 }
 
-/* lightbox */
+.item img:hover,
+.item video:hover {
+  transform: translateY(-4px);
+}
+
 #lightbox {
   position: fixed;
   top: 0; left: 0;
   width: 100vw; height: 100vh;
-  background: rgba(0,0,0,0.85);
+  background: rgba(0,0,0,0.92);
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
   z-index: 9999;
 }
-#lightbox.hidden { display: none; }
+
+#lightbox.hidden {
+  display: none;
+}
+
 #lightContent img,
 #lightContent video {
   max-width: 90vw;
   max-height: 80vh;
-  border-radius: 5px;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.6);
 }
+
 #download {
-  margin-top: 10px;
+  margin-top: 14px;
   color: #fff;
   border: 1px solid #fff;
-  padding: 8px 12px;
+  padding: 8px 14px;
   text-decoration: none;
   border-radius: 4px;
+  font-size: 13px;
+  letter-spacing: 0.3px;
+  transition: 0.2s;
 }
+
+#download:hover {
+  background: #fff;
+  color: #000;
+}
+
 #close {
   position: absolute;
-  top: 15px; right: 15px;
+  top: 15px; right: 20px;
   background: none;
   border: none;
-  font-size: 32px;
+  font-size: 42px;
   color: #fff;
   cursor: pointer;
+  line-height: 1;
 }
