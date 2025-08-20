@@ -170,6 +170,7 @@ header h2 {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;   /* NEW */
   filter: grayscale(70%) brightness(60%);
 }
 
@@ -184,5 +185,21 @@ header {
   width: 100%;
   height: auto;
   max-width: 100%;
+  display: block;
+}
+/* Adjust floating buttons spacing permanently */
+#topBtn {
+  bottom: 15px;
+  right: 90px;
+}
+#shuffleBtn {
+  bottom: 15px;
+  right: 15px;
+}
+
+/* Ensure videos fill masonry column properly */
+.item video {
+  width: 100%;
+  height: auto;
   display: block;
 }

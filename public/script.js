@@ -54,12 +54,15 @@ function closeLightbox(event){
 // render with optional shuffle
 function render(shuffled = false){
   gallery.innerHTML = '';
-  Promise.all([fetch('photos.json').then(r=>r.json()), fetch('videos.json').then(r=>r.json())]).then(([p,v])=>{
+  Promise.all([
+    fetch('photos.json').then(r=>r.json()),
+    fetch('videos.json').then(r=>r.json())
+  ]).then(([p, v]) => {
     let list = [...p, ...v];
-    list = list.filter((n, i) => list.indexOf(n) === i);
-    if (shuffled) {
-      for(let i=list.length-1;i>0;i--){
-        const j=Math.floor(Math.random()*(i+1));
+    list = list.filter((x,i)=>list.indexOf(x)===i);
+    if(shuffled){
+      for(let i = list.length-1; i>0; i--){
+        const j = Math.floor(Math.random()*(i+1));
         [list[i],list[j]]=[list[j],list[i]];
       }
     }
@@ -67,15 +70,15 @@ function render(shuffled = false){
     load('video', list.filter(n=>v.includes(n)));
     bindFilters();
 
-    const observer = new IntersectionObserver(entries=>{
-      entries.forEach(e=>{
+    const obs = new IntersectionObserver(en=>{
+      en.forEach(e=>{
         if(e.isIntersecting){
           e.target.classList.add('loaded');
-          observer.unobserve(e.target);
+          obs.unobserve(e.target);
         }
       });
     });
-    document.querySelectorAll('#gallery img').forEach(img=>observer.observe(img));
+    document.querySelectorAll('#gallery img').forEach(img=>obs.observe(img));
   });
 }
 
