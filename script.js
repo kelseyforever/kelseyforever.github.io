@@ -6,38 +6,40 @@ function load(type, list) {
     div.className = 'item';
     div.dataset.type = type;
 
-   if (type === 'photo') {
-  const img = document.createElement('img');
-  img.src = `assets/photos/${name}`;
-  img.loading = "lazy";
-  img.onload = () => img.classList.add('loaded'); // <—— ✅ make visible
-  img.onclick = () => openLightbox(img.src, 'img');
-  div.appendChild(img);
-} else {
-  const vid = document.createElement('video');
-  vid.src   = `assets/videos/${name}`;
-  const base = name.split('.').slice(0, -1).join('.');
-  vid.poster = `assets/videos/${base}.jpg`;
+    if (type === 'photo') {
+      const img = document.createElement('img');
+      img.src = `assets/photos/${name}`;
+      img.loading = "lazy";
+      img.onload = () => img.style.opacity = 1;      // make visible once loaded
+      img.onclick = () => openLightbox(img.src, 'img');
+      div.appendChild(img);
+    } else {
+      const vid = document.createElement('video');
+      vid.src = `assets/videos/${name}`;
+      const base = name.split('.').slice(0, -1).join('.');
+      vid.poster = `assets/videos/${base}.jpg`;
 
-  vid.muted = true;
-  vid.loop  = true;
-  vid.playsInline = true;
-  vid.autoplay = true;
-  vid.preload  = "metadata";
-  vid.onmouseenter = () => vid.play();
-  vid.onmouseleave = () => { vid.pause(); vid.currentTime = 0; };
-  vid.onloadeddata = () => { vid.style.opacity = 1 }; // <—— ✅ make video visible
-  vid.onclick = () => openLightbox(vid.src, "video");
+      vid.muted = true;
+      vid.loop = true;
+      vid.preload = "metadata";
+      vid.playsInline = true;
+      vid.autoplay = true;
+      vid.onmouseenter = () => vid.play();
+      vid.onmouseleave = () => { vid.pause(); vid.currentTime = 0; };
+      vid.onloadeddata = () => vid.style.opacity = 1;
+      vid.onclick = () => openLightbox(vid.src, "video");
 
-  div.appendChild(vid);
-}
+      div.appendChild(vid);
+    }
+
+    gallery.appendChild(div);
   });
 }
 
 function openLightbox(src, kind) {
   const lb = document.getElementById('lightbox');
   lb.classList.remove('hidden');
-  const c  = document.getElementById('lightContent');
+  const c = document.getElementById('lightContent');
   c.innerHTML = "";
   if (kind === "img") {
     const i = document.createElement('img');
@@ -46,40 +48,47 @@ function openLightbox(src, kind) {
   } else {
     const v = document.createElement('video');
     v.src = src;
-    v.autoplay = true;
     v.controls = true;
+    v.autoplay = true;
+    v.playsInline = true;
     c.appendChild(v);
   }
 }
 
-// render
-async function render(shuffle=false){
-  gallery.innerHTML="";
-  const p = await fetch('photos.json').then(r=>r.json());
-  const v = await fetch('videos.json').then(r=>r.json());
-  if(shuffle){
-    p.sort(()=>Math.random()-0.5);
-    v.sort(()=>Math.random()-0.5);
+// render page — if shuffle=true, mix order
+async function render(shuffle = false) {
+  gallery.innerHTML = "";
+  const p = await fetch('photos.json').then(r => r.json());
+  const v = await fetch('videos.json').then(r => r.json());
+  if (shuffle) {
+    p.sort(() => Math.random() - 0.5);
+    v.sort(() => Math.random() - 0.5);
   }
   load('photo', p);
   load('video', v);
 }
 
-document.getElementById('shuffleBtn').onclick = ()=>render(true);
-document.getElementById('topBtn').onclick     = ()=>window.scrollTo({top:0,behavior:"smooth"});
-window.onscroll=()=>document.getElementById('topBtn').style.display=(window.scrollY>300)?"block":"none";
-document.getElementById('close').onclick=()=>{ document.getElementById('lightbox').classList.add('hidden'); };
+// attach buttons
+document.getElementById('shuffleBtn').onclick = () => render(true);
+document.getElementById('topBtn').onclick = () => window.scrollTo({ top: 0, behavior: "smooth" });
+window.addEventListener('scroll', () => {
+  document.getElementById('topBtn').style.display =
+    (window.scrollY > 300) ? "block" : "none";
+});
+document.getElementById('close').onclick = () => {
+  document.getElementById('lightbox').classList.add('hidden');
+};
 
 // filters
-document.querySelectorAll('.filters button').forEach(btn=>{
-  btn.onclick=()=>{
-    document.querySelectorAll('.filters button').forEach(b=>b.classList.remove('active'));
+document.querySelectorAll('.filters button').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.filters button').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    const t=btn.dataset.type;
-    document.querySelectorAll('#gallery .item').forEach(it=>{
-      it.style.display=(t==="all"||it.dataset.type===t)?"block":"none";
+    const t = btn.dataset.type;        // -> "all", "photo", or "video"
+    document.querySelectorAll('#gallery .item').forEach(it => {
+      it.style.display = (t === "all" || it.dataset.type === t) ? "block" : "none";
     });
-  }
+  };
 });
 
 // initial
