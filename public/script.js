@@ -87,3 +87,9 @@ window.addEventListener('scroll',()=>{document.getElementById('topBtn').style.di
 
 // initial render
 render(true);
+
+function closeLightbox(event){
+  if(event.target.id === 'lightbox'){
+    document.getElementById('close').click();
+  }
+}
