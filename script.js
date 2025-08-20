@@ -1,264 +1,251 @@
-/* =======================
-   Memorial Gallery Script
-   ======================= */
+document.addEventListener('DOMContentLoaded', () => {
+  // Configuration: folder paths (if needed)
+  const PHOTO_DIR = 'photos/';   // directory where photo files are located (could be '' if in root)
+  const VIDEO_DIR = 'videos/';   // directory for video files and thumbnails
 
-(() => {
   const gallery = document.getElementById('gallery');
-  if (!gallery) return;
+  const lightbox = document.getElementById('lightbox');
+  const lightboxContent = document.getElementById('lightbox-content');
+  const lightboxClose = document.getElementById('lightbox-close');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const filterAllBtn = document.getElementById('filter-all');
+  const filterPhotoBtn = document.getElementById('filter-photos');
+  const filterVideoBtn = document.getElementById('filter-videos');
+  const topBtn = document.getElementById('top');
+  const shuffleBtn = document.getElementById('shuffle');
 
-  /* ---------- helpers ---------- */
+  // Helper: normalize a filename (remove extension, lowercase)
+  function normalizeName(filename) {
+    const dotIndex = filename.lastIndexOf('.');
+    const base = dotIndex >= 0 ? filename.slice(0, dotIndex) : filename;
+    return base.toLowerCase();
+  }
 
-  // normalize names to dedupe things like "IMG_0001.JPG" vs "img_0001 (copy).jpg"
-  const normalizeName = (name) =>
-    name.trim()
-        .toLowerCase()
-        .replace(/\s+/g, ' ')
-        .replace(/(\s*copy( \d+)?)$/i, '')
-        .replace(/\.(jpe?g|png|heic|mp4|mov)$/i, '');
+  // Fetch photos and videos JSON in parallel
+  Promise.all([
+    fetch('photos.json').then(res => res.json()),
+    fetch('videos.json').then(res => res.json())
+  ]).then(([photos, videos]) => {
+    const seenNames = new Set();
+    const allItems = [];
 
-  // dedupe by normalized basename
-  const dedupe = (list) => {
-    const seen = new Set();
-    return list.filter(n => {
-      const key = normalizeName(n);
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-  };
-
-  // in-place Fisher–Yates
-  const shuffle = (arr) => {
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
+    // Process videos first, so they take priority in case of name collisions
+    for (const vidName of videos) {
+      const base = normalizeName(vidName);
+      if (seenNames.has(base)) continue;  // skip duplicates
+      seenNames.add(base);
+      allItems.push({ type: 'video', file: vidName });
     }
-    return arr;
-  };
-
-  // blend photos/videos so videos aren’t bottom-heavy
-  function interleaveBalanced(photos, videos) {
-    const p = [...photos];
-    const v = [...videos];
-    shuffle(p); shuffle(v);
-
-    const merged = [];
-    const ratio = Math.max(1, Math.round(p.length / Math.max(1, v.length))); // ~3:1, 4:1, etc.
-
-    let i = 0, j = 0;
-    while (i < p.length || j < v.length) {
-      for (let k = 0; k < ratio && i < p.length; k++) merged.push({ type: 'photo', name: p[i++] });
-      if (j < v.length) merged.push({ type: 'video', name: v[j++] });
-    }
-    return merged;
-  }
-
-  // play() without console noise if paused immediately
-  function safePlay(video) {
-    const p = video.play();
-    if (p && typeof p.catch === 'function') p.catch(() => {});
-  }
-
-  // shared observer so tiles auto-preview while visible (helps mobile & desktop)
-  const previewObserver = new IntersectionObserver((entries) => {
-    entries.forEach(({ target, isIntersecting }) => {
-      if (isIntersecting) safePlay(target);
-      else { target.pause(); target.currentTime = 0; }
-    });
-  }, { threshold: 0.6 });
-
-  /* ---------- lightbox ---------- */
-
-  function ensureLightbox(){
-    let lb = document.getElementById('lightbox');
-    if (lb) return lb;
-
-    lb = document.createElement('div');
-    lb.id = 'lightbox';
-    lb.className = 'hidden';
-    lb.innerHTML = `
-      <div id="lightContentWrapper">
-        <button id="close" aria-label="Close">&times;</button>
-        <div id="lightContent"></div>
-        <div class="lb-actions">
-          <a id="download" class="lb-btn" download>Download</a>
-          <a id="openOriginal" class="lb-btn" target="_blank" rel="noopener">Open original</a>
-        </div>
-      </div>`;
-    document.body.appendChild(lb);
-
-    // backdrop click closes
-    lb.addEventListener('click', (e) => {
-      const wrap = document.getElementById('lightContentWrapper');
-      if (!wrap.contains(e.target)) closeLightbox();
-    });
-    // X closes
-    lb.querySelector('#close').onclick = closeLightbox;
-    // Esc closes
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeLightbox();
-    });
-
-    return lb;
-  }
-
-function closeLightbox(){
-  const lb  = document.getElementById('lightbox');
-  if (!lb) return;
-  const box = document.getElementById('lightContent');
-  // stop any playing video
-  box.querySelectorAll('video').forEach(v => v.pause());
-  lb.classList.add('hidden');
-}
-
-  function openLightbox(src, kind) {
-    const lb  = ensureLightbox();
-    const box = lb.querySelector('#lightContent');
-    const dl  = lb.querySelector('#download');
-    const open= lb.querySelector('#openOriginal');
-
-    // stop & clear previous
-    box.querySelectorAll('video').forEach(v => v.pause());
-    box.innerHTML = '';
-
-    if (kind === 'img') {
-      const img = document.createElement('img');
-      img.src = src;
-      box.appendChild(img);
-    } else {
-      const vid = document.createElement('video');
-      vid.src = src;
-      vid.controls = true;
-      vid.autoplay = true;
-      vid.playsInline = true;
-      box.appendChild(vid);
+    // Process photos
+    for (const photoName of photos) {
+      const base = normalizeName(photoName);
+      if (seenNames.has(base)) continue;
+      seenNames.add(base);
+      allItems.push({ type: 'photo', file: photoName });
     }
 
-    if (dl) { dl.href = src; dl.setAttribute('download', ''); }
-    if (open) open.href = src;
+    // Now we have combined list of items. We can (optionally) sort or shuffle initially if needed.
+    // By default, we'll keep the order as in JSON (videos first then photos) unless shuffle is clicked.
 
-    lb.classList.remove('hidden');
-  }
-
-  /* ---------- tile builders ---------- */
-
-  function addPhoto(name) {
-    const div = document.createElement('div');
-    div.className = 'item';
-    div.dataset.type = 'photo';
-
-    const img = document.createElement('img');
-    img.src = `assets/photos/${name}`;
-    img.loading = 'lazy';
-    img.addEventListener('click', () => openLightbox(img.src, 'img'));
-
-    div.appendChild(img);
-    gallery.appendChild(div);
-  }
-
-  function addVideo(name){
-  const base = name.replace(/\.\w+$/, '');
-  const div = document.createElement('div'); div.className='item'; div.dataset.type='video';
-  const v   = document.createElement('video');
-
-  v.src    = `assets/videos/${name}#t=0.01`;
-  v.poster = `assets/videos/${base}.jpg`;
-  v.muted = true; v.loop = true; v.playsInline = true; v.preload = 'metadata';
-
-  // 🔹 poster-as-background fallback so the tile never looks black
-  const posterUrl = `assets/videos/${base}.jpg`;
-  v.style.backgroundImage    = `url("${posterUrl}")`;
-  v.style.backgroundSize     = 'cover';
-  v.style.backgroundPosition = 'center';
-
-  // desktop hover preview
-  v.onmouseenter = () => v.play().catch(()=>{});
-  v.onmouseleave = () => { v.pause(); v.currentTime = 0; };
-
-  // mark visible once we have any frame
-  v.onloadeddata = () => div.classList.add('loaded');
-
-  // click => open lightbox (works on mobile/desktop)
-  v.onclick = () => openLightbox(`assets/videos/${name}`, 'video');
-
-  div.appendChild(v);
-  gallery.appendChild(div);
-}
-  /* ---------- rendering ---------- */
-
-  async function render(doShuffle = false) {
-    gallery.innerHTML = '';
-
-    const [photosRaw, videosRaw] = await Promise.all([
-      fetch('photos.json').then(r => r.json()).catch(() => []),
-      fetch('videos.json').then(r => r.json()).catch(() => [])
-    ]);
-
-    // dedupe, optional shuffle (we still interleave to distribute)
-    const photos = dedupe(photosRaw);
-    const videos = dedupe(videosRaw);
-    if (doShuffle) { shuffle(photos); shuffle(videos); }
-
-    // interleave for better distribution
-    const items = interleaveBalanced(photos, videos);
-
-    // build tiles
-    for (const it of items) {
-      if (it.type === 'photo') addPhoto(it.name);
-      else addVideo(it.name);
+    // Create DOM elements for each item
+    for (const item of allItems) {
+      let itemElem = document.createElement('div');
+      itemElem.classList.add('item');
+      if (item.type === 'photo') {
+        itemElem.classList.add('photo');
+        // Create image element
+        const img = document.createElement('img');
+        img.src = PHOTO_DIR + item.file;
+        img.alt = '';  // could set alt to filename or description if available
+        img.loading = 'lazy';  // lazy-load images offscreen [oai_citation:12‡web.dev](https://web.dev/articles/browser-level-image-lazy-loading#:~:text=Chrome%20loads%20images%20at%20different,fetched%20as%20the%20page%20loads)
+        // Fade-in effect: start invisible until loaded
+        img.style.opacity = '0';
+        img.onload = () => {
+          // on image load, fade it in
+          img.style.transition = 'opacity 0.5s ease';
+          img.style.opacity = '1';
+        };
+        // Clicking a photo opens it in lightbox
+        img.addEventListener('click', () => {
+          openLightbox(PHOTO_DIR + item.file, 'photo');
+        });
+        itemElem.appendChild(img);
+      } else if (item.type === 'video') {
+        itemElem.classList.add('video');
+        // Create video element with poster
+        const video = document.createElement('video');
+        const videoSrc = VIDEO_DIR + item.file;
+        const base = normalizeName(item.file);
+        const posterSrc = VIDEO_DIR + base + '.jpg';
+        video.src = videoSrc;
+        video.poster = posterSrc;
+        video.muted = true;
+        video.loop = true;
+        video.playsInline = true;
+        video.preload = 'metadata';
+        // We do NOT set autoplay here to avoid all videos playing at once; we'll play on hover/click.
+        video.style.opacity = '0';
+        // When video metadata (including poster) is loaded, fade in the tile
+        video.addEventListener('loadeddata', () => {
+          video.style.transition = 'opacity 0.5s ease';
+          video.style.opacity = '1';
+        });
+        // Hover preview on desktop
+        itemElem.addEventListener('mouseenter', () => {
+          video.play(); // hover to play (video is muted & allowed to autoplay) [oai_citation:13‡developer.chrome.com](https://developer.chrome.com/blog/autoplay#:~:text=Chrome%27s%20autoplay%20policies%20are%20simple%3A)
+        });
+        itemElem.addEventListener('mouseleave', () => {
+          video.pause();
+          video.currentTime = 0; // reset to beginning (show poster again)
+        });
+        // Click behavior differs for desktop vs mobile
+        itemElem.addEventListener('click', () => {
+          if (isTouchDevice()) {
+            // On touch devices, use click as preview toggle
+            if (video.paused || video.currentTime === 0) {
+              // Not yet playing, so start inline playback
+              video.play();
+              return; // do not open lightbox on first tap
+            }
+            // If video is already playing, fall through to open in lightbox
+          }
+          // On desktop (or second tap on mobile), open in fullscreen lightbox
+          openLightbox(videoSrc, 'video', posterSrc);
+          // Pause the tile video to avoid it playing in background
+          video.pause();
+          video.currentTime = 0;
+        });
+        itemElem.appendChild(video);
+      }
+      gallery.appendChild(itemElem);
     }
 
-    // sanity
-    console.log(`Rendered: ${photos.length} photos + ${videos.length} videos = ${items.length} tiles`);
-  }
-// (re)bind click-outside, X button, and Esc-to-close even if the DOM was present before
-(function wireLightbox(){
-  const lb    = document.getElementById('lightbox');
-  const wrap  = document.getElementById('lightContentWrapper');
-  const close = document.getElementById('close');
-  if (!lb || !wrap || !close) return;
-
-  // click outside content
-  lb.addEventListener('click', (e) => {
-    if (!wrap.contains(e.target)) closeLightbox();
+    // After rendering all items, we can optionally log counts or do any post-processing.
+    console.log(`Rendered: ${photos.length} photos + ${videos.length} videos = ${allItems.length} tiles`);
+  }).catch(err => {
+    console.error('Error loading gallery data:', err);
   });
 
-  // X button
-  close.addEventListener('click', closeLightbox);
+  // Helper to detect touch devices (basic check)
+  function isTouchDevice() {
+    return ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+  }
 
-  // Esc key
+  // Lightbox open function
+  function openLightbox(src, type, poster) {
+    // Clear any existing content
+    lightboxContent.innerHTML = '';
+    let elem;
+    if (type === 'photo') {
+      // Create large image
+      elem = document.createElement('img');
+      elem.src = src;
+      elem.alt = '';
+    } else if (type === 'video') {
+      elem = document.createElement('video');
+      elem.src = src;
+      elem.controls = true;       // allow user to control playback in fullscreen
+      elem.autoplay = true;       // start playing immediately in lightbox
+      elem.loop = true;           // keep looping in lightbox (optional)
+      elem.playsInline = true;    // ensure it stays in our custom fullscreen, not native player [oai_citation:14‡css-tricks.com](https://css-tricks.com/what-does-playsinline-mean-in-web-video/#:~:text=Mobile%20browsers%2C%20will%20play%20the,up%20fullscreen%20while%20it%20plays)
+      // We will un-mute the video so sound plays if any:
+      elem.muted = false;
+      // Use the same poster if provided (to show while video loads)
+      if (poster) elem.poster = poster;
+    }
+    lightboxContent.appendChild(elem);
+    // Set download link href to the media source
+    downloadBtn.href = src;
+    // If we want, we can set download attribute with a filename (optional). If not, the attribute on HTML is enough.
+    // Show the lightbox
+    lightbox.classList.add('open');  // assume CSS will display .open or remove .hidden etc.
+    // Prevent body from scrolling while lightbox open (optional, if desired)
+    document.body.style.overflow = 'hidden';
+  }
+
+  // Close lightbox function
+  function closeLightbox() {
+    // Hide lightbox
+    lightbox.classList.remove('open');
+    document.body.style.overflow = ''; // restore scrolling
+    // Stop any video in lightbox
+    const vid = lightboxContent.querySelector('video');
+    if (vid) {
+      vid.pause();
+    }
+    // Clear the content
+    lightboxContent.innerHTML = '';
+  }
+
+  // Set up lightbox close handlers
+  lightboxClose.addEventListener('click', closeLightbox);
+  // Clicking outside the content (overlay background) could also close, if #lightbox itself has a background:
+  lightbox.addEventListener('click', (e) => {
+    if (e.target === lightbox) {
+      // Only close if the click was on the backdrop, not on the inner content
+      closeLightbox();
+    }
+  });
+  // Close on Escape key
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'Escape') {
+      closeLightbox();
+    }
   });
-})();
-  /* ---------- controls & filters ---------- */
 
-  // shuffle button
-  const shuffleBtn = document.getElementById('shuffleBtn');
-  if (shuffleBtn) shuffleBtn.onclick = () => render(true);
+  // Shuffle button handler
+  shuffleBtn.addEventListener('click', () => {
+    const itemsArray = Array.from(gallery.children);
+    // Fisher-Yates shuffle
+    for (let i = itemsArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [itemsArray[i], itemsArray[j]] = [itemsArray[j], itemsArray[i]];
+    }
+    // Re-append in shuffled order
+    itemsArray.forEach(item => gallery.appendChild(item));
+  });
 
-  // top button (optional)
-  const topBtn = document.getElementById('topBtn');
-  if (topBtn) {
-    topBtn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-    window.addEventListener('scroll', () => {
-      topBtn.style.display = (window.scrollY > 300) ? 'block' : 'none';
-    }, { passive: true });
+  // Filter buttons handlers
+  filterAllBtn.addEventListener('click', () => {
+    setFilter('all');
+  });
+  filterPhotoBtn.addEventListener('click', () => {
+    setFilter('photo');
+  });
+  filterVideoBtn.addEventListener('click', () => {
+    setFilter('video');
+  });
+  function setFilter(mode) {
+    // Update active button styles
+    filterAllBtn.classList.toggle('active', mode === 'all');
+    filterPhotoBtn.classList.toggle('active', mode === 'photo');
+    filterVideoBtn.classList.toggle('active', mode === 'video');
+    // Show/hide items
+    const items = gallery.querySelectorAll('.item');
+    items.forEach(item => {
+      if (mode === 'all') {
+        item.style.display = '';
+      } else if (mode === 'photo') {
+        // hide if item is video
+        if (item.classList.contains('video')) item.style.display = 'none';
+        else item.style.display = '';
+      } else if (mode === 'video') {
+        if (item.classList.contains('photo')) item.style.display = 'none';
+        else item.style.display = '';
+      }
+    });
   }
 
-  // filters (All / Photos / Videos)
-  document.querySelectorAll('.filters button').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.filters button').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      const type = btn.dataset.type; // 'all' | 'photo' | 'video'
-      document.querySelectorAll('#gallery .item').forEach(el => {
-        el.style.display = (type === 'all' || el.dataset.type === type) ? 'block' : 'none';
-      });
-    });
+  // Scroll-to-top button
+  topBtn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });  // smooth scroll to top [oai_citation:15‡stackoverflow.com](https://stackoverflow.com/questions/15935318/smooth-scroll-to-top#:~:text=I%20think%20the%20simplest%20solution,scrollTo)
   });
-
-  /* ---------- go ---------- */
-  render();
-})();
+  // Optionally, show/hide the top button based on scroll position
+  window.addEventListener('scroll', () => {
+    if (window.pageYOffset > 300) {
+      topBtn.style.display = 'block';
+    } else {
+      topBtn.style.display = 'none';
+    }
+  });
+});
