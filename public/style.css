@@ -156,6 +156,13 @@ header .intro {
 .floating-btn:hover {
   transform: translateY(-3px);
 }
+#shuffleBtn {
+  margin-left: 10px;
+}
+
+#topBtn {
+  right: 130px;
+}
 
 #topBtn {
   right: 100px; /* push it left so both show */

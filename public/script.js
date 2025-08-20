@@ -38,14 +38,30 @@ function openLightbox(url,type){
 }
 document.getElementById('close').onclick=()=>lightbox.classList.add('hidden');
 
-function render(shuffled=false) {
+function render(shuffled = false) {
   gallery.innerHTML = '';
   Promise.all([fetch('photos.json').then(r=>r.json()), fetch('videos.json').then(r=>r.json())])
-    .then(([p,v])=>{
-      const unique = Array.from(new Set([...p, ...v]));
-      if(shuffled) unique.sort(()=>Math.random()-0.5);
-      load('photo', p.filter(n=>unique.includes(n)));
-      load('video', v.filter(n=>unique.includes(n)));
+    .then(([p, v]) => {
+      let list = [...p, ...v];
+      // suppress duplicates
+      list = list.filter((n, idx) => list.indexOf(n) === idx);
+      if (shuffled) {
+        // real shuffle
+        for (let i = list.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [list[i], list[j]] = [list[j], list[i]];
+        }
+      }
+      let photoIndex = 0, videoIndex = 0;
+      list.forEach(name => {
+        if (p.includes(name)) {
+          load('photo', [name]);
+          photoIndex++;
+        } else {
+          load('video', [name]);
+          videoIndex++;
+        }
+      });
     });
 }
 
