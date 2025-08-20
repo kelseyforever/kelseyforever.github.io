@@ -1,184 +1,123 @@
-// Assuming we have arrays of media items. Let's say:
-const photos = [ /* ... list of photo file URLs or objects ... */ ];
-const videos = [ /* ... list of video file URLs or objects ... */ ];
+(() => {
+  const gallery = document.getElementById('gallery');
 
-// Get references to DOM elements (assuming these IDs/classes in HTML)
-const galleryContainer = document.querySelector('.gallery-container');
-const filterAllBtn = document.getElementById('filter-all');
-const filterPhotosBtn = document.getElementById('filter-photos');
-const filterVideosBtn = document.getElementById('filter-videos');
-const shuffleBtn = document.getElementById('shuffle-btn');
+  /* ---------- utils ---------- */
+  const normalize = n => n.trim().toLowerCase()
+    .replace(/\s+/g,' ')
+    .replace(/(\s*copy( \d+)?)$/i,'')
+    .replace(/\.(jpe?g|png|heic|mp4|mov)$/i,'');
+  const dedupe = arr => {
+    const seen = new Set();
+    return arr.filter(n => { const k = normalize(n); if (seen.has(k)) return false; seen.add(k); return true; });
+  };
+  const fyShuffle = arr => { for (let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; };
 
-// State to track current filter
-let currentFilter = 'all';
-
-// Utility: Shuffle an array in-place (Fisher-Yates shuffle)
-function shuffleArray(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
+  /* ---------- lightbox (auto-create if missing) ---------- */
+  function ensureLightbox(){
+    let lb = document.getElementById('lightbox');
+    if (lb) return lb;
+    lb = document.createElement('div');
+    lb.id = 'lightbox';
+    lb.className = 'hidden';
+    lb.innerHTML = `
+      <div id="lightContentWrapper">
+        <button id="close" aria-label="Close">&times;</button>
+        <div id="lightContent"></div>
+        <a id="download" download>Download</a>
+      </div>`;
+    document.body.appendChild(lb);
+    lb.addEventListener('click', e => { if (e.target === lb) lb.classList.add('hidden'); });
+    lb.querySelector('#close').onclick = () => lb.classList.add('hidden');
+    return lb;
   }
-}
 
-// Render gallery based on current filter and given order of items
-function renderGallery(items) {
-  galleryContainer.innerHTML = '';  // clear existing tiles
-
-  items.forEach(item => {
-    // Determine if item is photo or video by type or file extension
-    const isVideo = item.type === 'video' || /\.(mp4|webm|ogg)$/.test(item); 
-    // (Above, assuming item could be an object {src, type} or a filename string.)
-    // Create tile element
-    const tile = document.createElement('div');
-    tile.className = 'tile';
-    if (isVideo) {
-      // Create video element for video
-      const videoEl = document.createElement('video');
-      videoEl.src = item.src || item;              // item might be {src: "..."} or a string URL
-      videoEl.loop = true;
-      videoEl.muted = true;
-      videoEl.playsInline = true;
-      videoEl.preload = 'metadata';  // load metadata (enough to get first frame)
-      // No controls on thumb (we'll add controls in lightbox view)
-      tile.appendChild(videoEl);
+  function openLightbox(src, kind){
+    const lb  = ensureLightbox();
+    const box = lb.querySelector('#lightContent');
+    const dl  = lb.querySelector('#download');
+    box.innerHTML = '';
+    if (kind === 'img'){
+      const i = new Image(); i.src = src; box.appendChild(i);
     } else {
-      // Create img element for photo
-      const imgEl = document.createElement('img');
-      imgEl.src = item.src || item;
-      imgEl.loading = 'lazy';  // use lazy loading for performance if supported
-      imgEl.alt = 'Photo';
-      tile.appendChild(imgEl);
+      const v = document.createElement('video');
+      v.src = src; v.controls = true; v.autoplay = true; v.playsInline = true;
+      box.appendChild(v);
     }
-    galleryContainer.appendChild(tile);
+    dl.href = src;
+    lb.classList.remove('hidden');
+  }
+
+  /* ---------- tile creators ---------- */
+  function addPhoto(name){
+    const div = document.createElement('div'); div.className='item'; div.dataset.type='photo';
+    const img = new Image(); img.loading='lazy'; img.src = `assets/photos/${name}`;
+    img.onclick = () => openLightbox(img.src, 'img');
+    div.appendChild(img);
+    gallery.appendChild(div);
+  }
+
+  function addVideo(name){
+    const base = name.replace(/\.\w+$/, '');
+    const div = document.createElement('div'); div.className='item'; div.dataset.type='video';
+    const v   = document.createElement('video');
+    v.src = `assets/videos/${name}#t=0.01`;      // nudge first frame
+    v.poster = `assets/videos/${base}.jpg`;       // your generated thumbs
+    v.muted = true; v.loop = true; v.playsInline = true; v.preload = 'metadata';
+
+    // desktop hover preview
+    v.onmouseenter = () => v.play();
+    v.onmouseleave = () => { v.pause(); v.currentTime = 0; };
+
+    // click => open lightbox everywhere (mobile/desktop)
+    v.onclick = () => openLightbox(`assets/videos/${name}`, 'video');
+
+    div.appendChild(v);
+    gallery.appendChild(div);
+  }
+
+  /* ---------- render flow ---------- */
+  async function render(doShuffle=false){
+    gallery.innerHTML = '';
+
+    let photos = await fetch('photos.json').then(r=>r.json()).catch(()=>[]);
+    let videos = await fetch('videos.json').then(r=>r.json()).catch(()=>[]);
+    photos = dedupe(photos);
+    videos = dedupe(videos);
+    if (doShuffle){ fyShuffle(photos); fyShuffle(videos); }
+
+    // Interleave so videos aren’t bottom-stacked
+    const max = Math.max(photos.length, videos.length);
+    for (let i=0; i<max; i++){
+      if (photos[i]) addPhoto(photos[i]);
+      if (videos[i]) addVideo(videos[i]);
+    }
+
+    console.log(`Rendered: ${photos.length} photos + ${videos.length} videos = ${gallery.children.length} tiles`);
+  }
+
+  /* ---------- controls ---------- */
+  const shuffleBtn = document.getElementById('shuffleBtn');
+  if (shuffleBtn) shuffleBtn.onclick = () => render(true);
+
+  const topBtn = document.getElementById('topBtn');
+  if (topBtn){
+    topBtn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.addEventListener('scroll', () => {
+      topBtn.style.display = window.scrollY > 300 ? 'block' : 'none';
+    }, { passive: true });
+  }
+
+  // Filters
+  document.querySelectorAll('.filters button').forEach(btn=>{
+    btn.onclick = () => {
+      document.querySelectorAll('.filters button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const t = btn.dataset.type;
+      document.querySelectorAll('#gallery .item').forEach(it=>{
+        it.style.display = (t === 'all' || it.dataset.type === t) ? 'block' : 'none';
+      });
+    };
   });
 
-  // After rendering all tiles, attach hover and click events
-  attachTileEvents();
-}
-
-// Attach hover (for videos) and click (for lightbox) events to tiles
-function attachTileEvents() {
-  const allTiles = document.querySelectorAll('.gallery-container .tile');
-  allTiles.forEach(tile => {
-    const mediaElem = tile.querySelector('img, video');
-    if (!mediaElem) return;
-    const isVideo = mediaElem.tagName.toLowerCase() === 'video';
-
-    // Click event for lightbox (both image and video)
-    mediaElem.addEventListener('click', e => {
-      e.stopPropagation();
-      if (isVideo) {
-        // Pause the preview if it was playing
-        mediaElem.pause();
-        openLightbox(mediaElem.currentSrc || mediaElem.src, 'video');
-      } else {
-        openLightbox(mediaElem.currentSrc || mediaElem.src, 'photo');
-      }
-    });
-
-    // Hover events (desktop only, videos only)
-    if (isVideo) {
-      // Play on hover (mouseenter), pause on leave (mouseleave)
-      tile.addEventListener('mouseenter', () => {
-        // Play the video preview (catch promise to avoid console error if interrupted)
-        mediaElem.play().catch(err => { /* silence play interruption errors */ });
-      });
-      tile.addEventListener('mouseleave', () => {
-        mediaElem.pause();
-        // Optional: reset to beginning so it previews from start next time
-        mediaElem.currentTime = 0;
-      });
-
-      // For mobile devices (no hover), you *could* add a touchstart to play, but 
-      // we'll rely on click to open lightbox instead of inline play to keep it simple.
-    }
-  });
-}
-
-// Lightbox overlay setup
-const lightbox = document.createElement('div');
-lightbox.id = 'lightbox';
-lightbox.innerHTML = `<span class="close">&times;</span><div class="content"></div>`;
-document.body.appendChild(lightbox);
-const lightboxContent = lightbox.querySelector('.content');
-const lightboxClose = lightbox.querySelector('.close');
-
-// Close lightbox on close button or backdrop click
-lightboxClose.addEventListener('click', () => { lightbox.classList.remove('active'); });
-lightbox.addEventListener('click', e => {
-  if (e.target === lightbox) {  // click outside the content
-    lightbox.classList.remove('active');
-  }
-});
-
-// Function to open lightbox with given media
-function openLightbox(src, type) {
-  lightboxContent.innerHTML = '';  // clear previous content
-  if (type === 'photo') {
-    const img = document.createElement('img');
-    img.src = src;
-    img.alt = 'Full Photo';
-    lightboxContent.appendChild(img);
-  } else if (type === 'video') {
-    const vid = document.createElement('video');
-    vid.src = src;
-    vid.controls = true;
-    vid.autoplay = true;
-    vid.playsInline = true;
-    lightboxContent.appendChild(vid);
-    // Video will autoplay with controls; user can unmute if desired
-  }
-  // Add download link
-  const downloadLink = document.createElement('a');
-  downloadLink.href = src;
-  downloadLink.download = '';  // triggers download of the same filename
-  downloadLink.textContent = 'Download';
-  downloadLink.className = 'download-link';
-  lightboxContent.appendChild(downloadLink);
-
-  // Show lightbox
-  lightbox.classList.add('active');
-}
-
-// Shuffle functionality
-function shuffleGallery() {
-  if (currentFilter === 'all') {
-    // Shuffle combined list of photos and videos
-    const combined = photos.concat(videos);
-    shuffleArray(combined);
-    renderGallery(combined);
-  } else if (currentFilter === 'photos') {
-    const photosShuffled = [...photos];
-    shuffleArray(photosShuffled);
-    renderGallery(photosShuffled);
-  } else if (currentFilter === 'videos') {
-    const videosShuffled = [...videos];
-    shuffleArray(videosShuffled);
-    renderGallery(videosShuffled);
-  }
-}
-
-// Filter button event handlers
-filterAllBtn.addEventListener('click', () => {
-  currentFilter = 'all';
-  // Render all photos + videos (in default order or shuffled state?)
-  const combined = photos.concat(videos);
-  renderGallery(combined);
-});
-filterPhotosBtn.addEventListener('click', () => {
-  currentFilter = 'photos';
-  renderGallery(photos);
-});
-filterVideosBtn.addEventListener('click', () => {
-  currentFilter = 'videos';
-  renderGallery(videos);
-});
-
-// Shuffle button handler
-shuffleBtn.addEventListener('click', () => {
-  shuffleGallery();
-});
-
-// INITIALIZE GALLERY ON PAGE LOAD
-renderGallery( photos.concat(videos) );
-console.log(`Rendered: ${photos.length} photos + ${videos.length} videos = ${photos.length + videos.length} tiles`);
+  render();
+})();
