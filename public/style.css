@@ -38,6 +38,9 @@ header .intro {
   color: #aaa;
 }
 
+.filters {
+  margin-bottom: 25px;
+}
 .filters button {
   background: transparent;
   border: 1px solid #444;
@@ -50,7 +53,6 @@ header .intro {
   font-size: 13px;
   transition: 0.2s;
 }
-
 .filters button.active,
 .filters button:hover {
   background: #444;
@@ -62,7 +64,6 @@ header .intro {
   column-gap: 25px;
   padding: 0 40px 80px;
 }
-
 @media(max-width:1000px) { #gallery { column-count: 3; } }
 @media(max-width:700px)  { #gallery { column-count: 2; } }
 
@@ -85,6 +86,7 @@ header .intro {
   transform: translateY(-4px);
 }
 
+/* --- Lightbox --- */
 #lightbox {
   position: fixed;
   top:0; left:0;
@@ -96,8 +98,7 @@ header .intro {
   flex-direction:column;
   z-index:9999;
 }
-
-#lightbox.hidden {display:none;}
+#lightbox.hidden { display:none; }
 
 #lightContent img,
 #lightContent video {

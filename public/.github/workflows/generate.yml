@@ -13,4 +13,4 @@ jobs:
         with:
           node-version: 18
       - run: node script/generate_json.js
-    
+      # Don't auto-commit back into GitHub, just let Vercel use the JSON in its build
