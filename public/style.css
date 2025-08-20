@@ -168,3 +168,17 @@ header .intro {
   right: 100px; /* push it left so both show */
   display: none;
 }
+.item img {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  display: block;
+  width: 100%;
+}
+
+.item img.loaded {
+  opacity: 1;
+}
+
+.item {
+  min-height: 250px; /* reserve space so things don't jump while loading */
+}

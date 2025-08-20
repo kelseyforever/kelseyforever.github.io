@@ -80,7 +80,7 @@ function bindFilters(){
   });
 }
 
-// Shuffle button:
+// Shuffle button
 document.getElementById('shuffleBtn').addEventListener('click', ()=>render(true));
 
 // Back to top
@@ -91,3 +91,14 @@ window.addEventListener('scroll', ()=>{
 
 // Initial render
 render(true);
+
+// Fade-in observer AFTER initial render
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('loaded');
+      observer.unobserve(e.target);
+    }
+  });
+});
+document.querySelectorAll('#gallery img').forEach(img=>observer.observe(img));
