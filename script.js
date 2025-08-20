@@ -12,10 +12,14 @@ function load(type, list) {
       img.loading = "lazy";
       img.onclick = () => openLightbox(img.src, 'img');
       div.appendChild(img);
-    } else {
+        } else {
       const vid = document.createElement('video');
       vid.src = `assets/videos/${name}`;
-      vid.poster = `assets/videos/${name.replace(/\.\w+$/, '')}.jpg`;
+
+      // safer thumbnail path
+      const base = name.split('.').slice(0, -1).join('.');
+      vid.poster = `assets/videos/${base}.jpg`;
+
       vid.muted = true;
       vid.loop  = true;
       vid.playsInline = true;
@@ -24,9 +28,7 @@ function load(type, list) {
       vid.onmouseenter = () => vid.play();
       vid.onmouseleave = () => { vid.pause(); vid.currentTime = 0; };
       vid.play();
-      // click → open lightbox both mobile and desktop
       vid.onclick = () => openLightbox(vid.src, "video");
-
       div.appendChild(vid);
     }
     gallery.appendChild(div);
