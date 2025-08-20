@@ -1,6 +1,11 @@
 /* ---------- base ---------- */
 * { box-sizing: border-box; }
-body { margin: 0; background:#121212; color:#fff; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
+body {
+  margin: 0;
+  background:#121212;
+  color:#fff;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+}
 
 header { text-align:center; padding:40px 0 10px; position:relative; z-index:2; }
 header h1 { margin:0; font-size:32px; }
@@ -18,7 +23,7 @@ header h2 { margin:6px 0 20px; font-size:15px; font-weight:400; }
 .hero{
   position: relative;
   width: 100%;
-  height: 320px;                 /* desktop size */
+  height: 320px;                    /* desktop size */
   background-image: url('assets/photos/kels.png');
   background-size: cover;
   background-position: center 25%;
@@ -35,7 +40,7 @@ header h2 { margin:6px 0 20px; font-size:15px; font-weight:400; }
 .item{
   break-inside: avoid;
   margin-bottom: 18px;
-  background:#0b0b0b;
+  background:#0b0b0b;               /* placeholder so blanks never look broken */
   border-radius: 8px;
   overflow: hidden;
 }
@@ -48,7 +53,7 @@ header h2 { margin:6px 0 20px; font-size:15px; font-weight:400; }
   border-radius:8px;
   transition: transform .2s;
 }
-/* never hide tiles via opacity—prevents “black box” look */
+/* never hide tiles via opacity—prevents “black box” look on mobile */
 #gallery .item img, #gallery .item video { opacity: 1 !important; }
 
 .item:hover img,
@@ -61,16 +66,40 @@ header h2 { margin:6px 0 20px; font-size:15px; font-weight:400; }
   display:flex; justify-content:center; align-items:center; z-index:9999;
 }
 #lightbox.hidden{ display:none; }
-#lightContentWrapper{ position:relative; max-width:80%; max-height:90%; }
-#lightContent img, #lightContent video{ max-width:100%; max-height:100%; }
+#lightContentWrapper{
+  position:relative; max-width:90vw; max-height:90vh;
+  cursor: default; /* keep pointer normal over content */
+}
+#lightContent img, #lightContent video{
+  max-width:100%; max-height:100%; display:block;
+}
 #close{
   position:absolute; top:-35px; right:-35px; background:none;
   color:#fff; font-size:35px; border:none; cursor:pointer;
 }
-#download{
-  color:#fff; margin-top:10px; font-size:12px; text-decoration:none;
-  padding:5px 15px; background:rgba(255,255,255,.12); border-radius:6px;
+
+/* action buttons in lightbox */
+.lb-actions{
+  position: absolute;
+  right: .5rem;
+  bottom: .5rem;
+  display: flex;
+  gap: 8px;
 }
+.lb-btn{
+  display: inline-block;
+  color: #fff;
+  text-decoration: none;
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.18);
+  backdrop-filter: blur(4px);
+}
+.lb-btn:hover{ background: rgba(255,255,255,0.28); }
+
+/* lightbox cursors */
+#lightbox { cursor: zoom-out; }
 
 /* ---------- floating buttons ---------- */
 .floating-btn{
