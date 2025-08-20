@@ -124,13 +124,20 @@ header .text-bg {
 .item video::-webkit-media-controls-start-playback-button {
   display:none !important;
 }
-/* --- fix GitHub Pages video thumbnails in masonry --- */
+/* If video hasn’t loaded yet, use blurred screenshot of itself as background */
+.item video:not([poster]) {
+  background-size: cover;
+  background-position: center;
+  filter: blur(0px);
+}
+
+/* optional – if video hasn’t rendered first frame after 0.5s, blur the first frame less */
 .item video {
-  width: 100% !important;
-  height: auto !important;
-  display: block !important;
-  object-fit: cover !important;  /* change to 'contain' if you prefer full frame */
-  opacity: 1 !important;
-  visibility: visible !important;
-  background: #000 !important;   /* fallback color */
+  animation: checkLoaded 1s forwards;
+}
+@keyframes checkLoaded {
+  0% {}
+  100% {
+    filter: blur(0px);
+  }
 }
