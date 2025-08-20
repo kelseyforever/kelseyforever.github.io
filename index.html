@@ -1,41 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Kelsey Morgan Meyer — 11.04.1992 ✦ 11.14.2024</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<div class="hero"></div>
+  <div class="hero"></div>
 
-<header>
-  <h1>Kelsey Morgan Meyer</h1>
-  <h2>11.04.1992 — 11.14.2024</h2>
-  <p class="intro">
-    A collection of photos and videos gathered from Kelsey’s personal accounts — preserved here so anyone who loved her may revisit, remember, and keep what mattered to them. If you would like a photo removed, or have an issue please reach out.
-  </p>
+  <header>
+    <h1>Kelsey Morgan Meyer</h1>
+    <h2>11.04.1992 — 11.14.2024</h2>
+    <p class="intro">
+      A collection of photos and videos gathered from Kelsey’s personal accounts — preserved here so anyone who loved her may revisit, remember, and keep what mattered to them. If you would like a photo removed, or have an issue please reach out.
+    </p>
 
-  <div class="filters">
-    <button data-type="all" class="active">All</button>
-    <button data-type="photo">Photos</button>
-    <button data-type="video">Videos</button>
+    <div class="filters">
+      <button data-type="all" class="active">All</button>
+      <button data-type="photo">Photos</button>
+      <button data-type="video">Videos</button>
+    </div>
+  </header>
+
+  <div id="gallery"></div>
+
+  <div id="lightbox" class="hidden">
+    <button id="close">×</button>
+    <div id="lightContentWrapper">
+      <div id="lightContent"></div>
+      <a id="download" href="#" download>Download</a>
+    </div>
   </div>
-</header>
 
-<div id="gallery"></div>
+  <button id="shuffleBtn" class="floating-btn">🔀 Shuffle</button>
+  <button id="topBtn" class="floating-btn" style="display:none">⬆️ Top</button>
 
-<div id="lightbox" class="hidden">
-  <button id="close">×</button>
-  <div id="lightContentWrapper">
-    <div id="lightContent"></div>
-    <a id="download" href="#" download>Download</a>
-  </div>
-</div>
-
-<button id="shuffleBtn" class="floating-btn">🔀 Shuffle</button>
-<button id="topBtn" class="floating-btn" style="display:none">⬆️ Top</button>
-
-<script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
