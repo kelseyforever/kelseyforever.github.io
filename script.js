@@ -102,13 +102,14 @@
     return lb;
   }
 
-  function closeLightbox(){
-    const lb  = document.getElementById('lightbox');
-    if (!lb) return;
-    const box = document.getElementById('lightContent');
-    box.querySelectorAll('video').forEach(v => v.pause());
-    lb.classList.add('hidden');
-  }
+function closeLightbox(){
+  const lb  = document.getElementById('lightbox');
+  if (!lb) return;
+  const box = document.getElementById('lightContent');
+  // stop any playing video
+  box.querySelectorAll('video').forEach(v => v.pause());
+  lb.classList.add('hidden');
+}
 
   function openLightbox(src, kind) {
     const lb  = ensureLightbox();
@@ -216,17 +217,17 @@
   const lb    = document.getElementById('lightbox');
   const wrap  = document.getElementById('lightContentWrapper');
   const close = document.getElementById('close');
-  if (!lb || !wrap || !close) return; // if created dynamically, openLightbox() will also wire
+  if (!lb || !wrap || !close) return;
 
-  // click outside content closes
+  // click outside content
   lb.addEventListener('click', (e) => {
     if (!wrap.contains(e.target)) closeLightbox();
   });
 
-  // X closes
+  // X button
   close.addEventListener('click', closeLightbox);
 
-  // Esc closes
+  // Esc key
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeLightbox();
   });
