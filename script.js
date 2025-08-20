@@ -6,32 +6,31 @@ function load(type, list) {
     div.className = 'item';
     div.dataset.type = type;
 
-    if (type === 'photo') {
-      const img = document.createElement('img');
-      img.src = `assets/photos/${name}`;
-      img.loading = "lazy";
-      img.onclick = () => openLightbox(img.src, 'img');
-      div.appendChild(img);
-        } else {
-      const vid = document.createElement('video');
-      vid.src = `assets/videos/${name}`;
+   if (type === 'photo') {
+  const img = document.createElement('img');
+  img.src = `assets/photos/${name}`;
+  img.loading = "lazy";
+  img.onload = () => img.classList.add('loaded'); // <—— ✅ make visible
+  img.onclick = () => openLightbox(img.src, 'img');
+  div.appendChild(img);
+} else {
+  const vid = document.createElement('video');
+  vid.src   = `assets/videos/${name}`;
+  const base = name.split('.').slice(0, -1).join('.');
+  vid.poster = `assets/videos/${base}.jpg`;
 
-      // safer thumbnail path
-      const base = name.split('.').slice(0, -1).join('.');
-      vid.poster = `assets/videos/${base}.jpg`;
+  vid.muted = true;
+  vid.loop  = true;
+  vid.playsInline = true;
+  vid.autoplay = true;
+  vid.preload  = "metadata";
+  vid.onmouseenter = () => vid.play();
+  vid.onmouseleave = () => { vid.pause(); vid.currentTime = 0; };
+  vid.onloadeddata = () => { vid.style.opacity = 1 }; // <—— ✅ make video visible
+  vid.onclick = () => openLightbox(vid.src, "video");
 
-      vid.muted = true;
-      vid.loop  = true;
-      vid.playsInline = true;
-      vid.autoplay = true;
-      vid.preload  = "metadata";
-      vid.onmouseenter = () => vid.play();
-      vid.onmouseleave = () => { vid.pause(); vid.currentTime = 0; };
-      vid.play();
-      vid.onclick = () => openLightbox(vid.src, "video");
-      div.appendChild(vid);
-    }
-    gallery.appendChild(div);
+  div.appendChild(vid);
+}
   });
 }
 
