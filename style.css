@@ -120,24 +120,13 @@ header .text-bg {
 }
 
 
-/* ensures the video has a starting frame visible */
-.item video::-webkit-media-controls-start-playback-button {
-  display:none !important;
-}
-/* If video hasn’t loaded yet, use blurred screenshot of itself as background */
-.item video:not([poster]) {
-  background-size: cover;
-  background-position: center;
-  filter: blur(0px);
-}
-
-/* optional – if video hasn’t rendered first frame after 0.5s, blur the first frame less */
+/* Force videos in the gallery to actually show (fix for GitHub Pages) */
 .item video {
-  animation: checkLoaded 1s forwards;
-}
-@keyframes checkLoaded {
-  0% {}
-  100% {
-    filter: blur(0px);
-  }
+  width: 100% !important;
+  height: auto !important;
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  object-fit: cover !important;
+  background: #000 !important;
 }
