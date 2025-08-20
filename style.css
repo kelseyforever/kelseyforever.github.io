@@ -47,3 +47,48 @@ header h2{margin:6px 0 20px;font-size:15px;font-weight:400}
 @media (max-width: 560px){
   #gallery{column-count:1;padding:480px 10px 90px}
 }
+/* --- mobile/tablet responsive masonry & hero fixes --- */
+
+/* Default (desktop) stays as you have it */
+#gallery{
+  column-count: 3;
+  column-gap: 18px;
+  padding: 0 18px 80px;
+}
+.hero{
+  /* your desktop hero */
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  height: 420px;
+  background-size: cover;
+  background-position: center top;
+  filter: grayscale(70%) brightness(60%);
+}
+
+/* Large tablets / small laptops */
+@media (max-width: 1024px){
+  #gallery{ column-count: 3; column-gap:16px; padding:0 16px 70px; }
+  .item{ margin-bottom:16px; }
+  .hero{ height: 360px; background-position: center; }
+}
+
+/* Tablets & big phones */
+@media (max-width: 768px){
+  #gallery{ column-count: 2; column-gap:14px; padding:0 14px 70px; }
+  .item{ margin-bottom:14px; }
+  /* stop the full-bleed trick to avoid horizontal jitter on mobile */
+  .hero{
+    width: 100%;
+    margin-left: 0;
+    height: 300px;
+    background-position: center;   /* keep faces centered */
+    background-size: cover;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px){
+  #gallery{ column-count: 2; column-gap:12px; padding:0 12px 60px; }
+  .item{ margin-bottom:12px; }
+  .hero{ height: 240px; background-position: center; }
+}
