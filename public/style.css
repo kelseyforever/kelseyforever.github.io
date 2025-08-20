@@ -236,3 +236,26 @@ header .intro {
 #lightContent {
   pointer-events: none; /* so clicks *don’t* get absorbed by this invisible div */
 }
+/* Restore original column masonry layout */
+#gallery {
+  column-count: 3;
+  column-gap: 18px;
+}
+
+.item {
+  break-inside: avoid;
+  margin-bottom: 18px;
+}
+
+.item img,
+.item video {
+  width: 100%;
+  display: block;
+  border-radius: 8px;
+  transition: transform .2s;
+}
+
+.item img:hover,
+.item video:hover {
+  transform: translateY(-4px);
+}
