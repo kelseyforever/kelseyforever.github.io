@@ -38,64 +38,45 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function addVideo(name){
-  const base = name.replace(/\.\w+$/, ''); // keep original case
+  const base = name.replace(/\.\w+$/, '');
   const div  = document.createElement('div');
   div.className = 'item video';
-  div.dataset.type = 'video';
 
-  // Poster fallback img (always shows something)
-  const posterUrl = `assets/videos/${base}.jpg`;
-  const thumb = document.createElement('img');
-  thumb.className = 'poster-fallback';
-  thumb.src = posterUrl;
-  thumb.alt = '';
-  thumb.loading = 'lazy';
-  div.appendChild(thumb);
+  // poster overlay (sits visually on top but now pointer-events:none)
+  const poster = document.createElement('img');
+  poster.className = 'poster-fallback';
+  poster.src = `${VIDEO_DIR}/${base}.jpg`;
+  div.appendChild(poster);
 
-  // The actual video
+  // the video element
   const v = document.createElement('video');
-  v.src = `assets/videos/${name}#t=0.01`; // tiny seek nudges a first frame
-  v.poster = posterUrl;
-  v.muted = true;
-  v.loop = true;
+  v.src = `${VIDEO_DIR}/${name}#t=0.01`;      // nudge off black first frame
+  v.muted = true;           // required for hover autoplay
+  v.setAttribute('muted','');                 // Safari/iOS quirk
   v.playsInline = true;
+  v.setAttribute('playsinline','');           // iOS quirk
+  v.loop = true;
   v.preload = 'metadata';
-  v.style.opacity = '0'; // fade in only when ready
   div.appendChild(v);
 
-  // When video is actually usable, fade in and hide poster
-  const markReady = () => {
-    v.style.opacity = '1';
-    div.classList.add('ready');
-  };
-  v.addEventListener('loadeddata', markReady, { once: true });
-  v.addEventListener('canplay',     markReady, { once: true });
+  // mark tile ready as soon as the browser has enough to draw a frame
+  const markReady = () => div.classList.add('ready');
+  v.addEventListener('loadedmetadata', markReady, { once:true });
+  v.addEventListener('loadeddata',     markReady, { once:true });
+  v.addEventListener('canplay',        markReady, { once:true });
 
-  // If video errors/stalls, keep the poster fallback visible
-  v.addEventListener('error', () => {
-    // leave poster showing; no further action
-    console.warn('Video failed to load:', name);
-  });
-
-  // Desktop hover preview
-  if (window.matchMedia('(pointer:fine)').matches) {
-    v.addEventListener('mouseenter', () => v.play().catch(()=>{}));
-    v.addEventListener('mouseleave', () => { v.pause(); v.currentTime = 0; });
-  } else {
-    // Touch: first tap toggles preview, second opens lightbox
-    let tapped = false;
-    v.addEventListener('click', (e) => {
-      if (!tapped) { tapped = true; v.play().catch(()=>{}); setTimeout(()=>tapped=false, 800); }
-      else { openLightbox(`assets/videos/${name}`, 'video'); v.pause(); }
-    });
+  // hover preview (desktop / pointer devices only)
+  const canHover = window.matchMedia('(pointer:fine)').matches && !('ontouchstart' in window);
+  if (canHover) {
+    div.addEventListener('mouseenter', () => { v.play().catch(()=>{}); });
+    div.addEventListener('mouseleave', () => { v.pause(); v.currentTime = 0; });
   }
 
-  // Click anywhere on the tile opens the lightbox on desktop
-  v.addEventListener('click', () => openLightbox(`assets/videos/${name}`, 'video'));
+  // click => open in lightbox everywhere
+  v.addEventListener('click', () => openLightbox(`${VIDEO_DIR}/${name}`, 'video'));
 
   gallery.appendChild(div);
 }
-
   // --- lightbox
   function openLightbox(src, kind, poster){
     lbBox.innerHTML = '';
