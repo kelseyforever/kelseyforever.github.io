@@ -83,18 +83,32 @@ header h2{margin:6px 0 20px;font-size:15px;font-weight:400;}
 }
 
 /* --- VIDEO POSTER FALLBACK (prevents black tiles) --- */
-.item.video{ position:relative; }
-.item.video .poster-fallback{
-  position:absolute; inset:0;
-  width:100%; height:100%;
-  object-fit:cover;
-  border-radius:8px;
-  transition: opacity .25s ease;
+.item.video { 
+  position: relative; 
 }
-.item.video.ready .poster-fallback{ opacity:0; pointer-events:none; }
+
+.item.video .poster-fallback{
+  position: absolute; 
+  inset: 0;
+  width: 100%; 
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+  transition: opacity .25s ease;
+  pointer-events: none;           /* <-- always non-interactive */
+}
+
+.item.video.ready .poster-fallback{ 
+  opacity: 0;                     /* fade away when video is ready */
+}
+
 .item.video video{
-  background:#000;           /* pleasant baseline while decoding */
-  display:block; width:100%; height:auto; border-radius:8px;
+  display: block; 
+  width: 100%; 
+  height: auto; 
+  border-radius: 8px;
+  object-fit: cover;
+  background: #000;               /* pleasant baseline while decoding */
 }
 
 /* --------------- lightbox -------------- */
