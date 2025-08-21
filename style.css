@@ -8,7 +8,7 @@ header {
   padding:40px 0 10px;
   position:relative;
   z-index:2;
-  margin-top:-130px;       /* pulls the header up over the hero */
+  margin-top:-130px;       /* pull the header up over the hero */
 }
 header h1{margin:0;font-size:32px;}
 header h2{margin:6px 0 20px;font-size:15px;font-weight:400;}
@@ -24,7 +24,7 @@ header h2{margin:6px 0 20px;font-size:15px;font-weight:400;}
 }
 
 /* ---------------- hero ---------------- */
-/* Make it responsive; no fixed positioning (mobile browsers hate it) */
+/* responsive; no fixed positioning */
 .hero{
   position: relative;
   width: 100%;
@@ -50,20 +50,26 @@ header h2{margin:6px 0 20px;font-size:15px;font-weight:400;}
   column-gap:18px;
   padding: 0 18px 120px;
 }
-.item{ break-inside:avoid; margin-bottom:18px; background:#0b0b0b; border-radius:8px; overflow:hidden; }
+.item{
+  break-inside:avoid;
+  margin-bottom:18px;
+  background:#0b0b0b;
+  border-radius:8px;
+  overflow:hidden;
+}
 
-/* fade-in when loaded */
+/* fade-in when loaded (images & videos) */
 .item img,
 .item video{
   width:100%;
   display:block;
   border-radius:8px;
   transition: transform .2s, opacity .25s ease;
-  opacity:0;                 /* start hidden */
+  opacity:0;                 /* start hidden; JS will add .loaded */
   object-fit:cover;
 }
 
-/* show once loaded – supports both patterns */
+/* show once loaded – supports both class patterns */
 .item.loaded img,
 .item.loaded video,
 .item img.loaded,
@@ -76,9 +82,19 @@ header h2{margin:6px 0 20px;font-size:15px;font-weight:400;}
   transform: translateY(-4px);
 }
 
-/* video tile baseline so first frame/ poster blends in */
-.item video{
-  background:#000;
+/* --- VIDEO POSTER FALLBACK (prevents black tiles) --- */
+.item.video{ position:relative; }
+.item.video .poster-fallback{
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  object-fit:cover;
+  border-radius:8px;
+  transition: opacity .25s ease;
+}
+.item.video.ready .poster-fallback{ opacity:0; pointer-events:none; }
+.item.video video{
+  background:#000;           /* pleasant baseline while decoding */
+  display:block; width:100%; height:auto; border-radius:8px;
 }
 
 /* --------------- lightbox -------------- */
@@ -119,8 +135,8 @@ header h2{margin:6px 0 20px;font-size:15px;font-weight:400;}
   line-height:1;
 }
 .lb-btn:hover{ background:rgba(255,255,255,.22); }
-.lb-btn:visited{ color:#fff; }                 /* prevent purple visited */
-.lb-btn:focus{ outline:2px solid #fff3; outline-offset:2px; }  /* a11y focus */
+.lb-btn:visited{ color:#fff; }                                  /* keep white */
+.lb-btn:focus{ outline:2px solid #fff3; outline-offset:2px; }    /* a11y */
 
 /* ---------- floating buttons ----------- */
 .floating-btn{
@@ -154,15 +170,12 @@ header h2{margin:6px 0 20px;font-size:15px;font-weight:400;}
 #gallery .item img,
 #gallery .item video{
   opacity: 1 !important;
-  transition: transform .2s ease;   /* no opacity gating */
+  transition: transform .2s ease;   /* no opacity gating conflicts */
 }
 
 /* keep the hover lift */
 #gallery .item:hover img,
 #gallery .item:hover video{ transform: translateY(-4px); }
 
-/* video baseline so first frame blends in while loading */
-#gallery .item video{ background:#000; }
-
-/* make sure nothing is blocking mouse events */
+/* ensure nothing is blocking mouse events */
 #gallery .item{ pointer-events:auto; }
