@@ -97,10 +97,30 @@ header h2{margin:6px 0 20px;font-size:15px;font-weight:400;}
   position:absolute; top:-35px; right:-35px; background:none;
   color:#fff; font-size:35px; border:none; cursor:pointer;
 }
-#download{
-  color:#fff; margin-top:10px; font-size:12px; text-decoration:none;
-  padding:5px 15px; background:rgba(255,255,255,.12); border-radius:6px;
+
+/* actions row (Download + Open original) */
+.lb-actions{
+  margin-top:12px;
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  flex-wrap:wrap;
 }
+.lb-btn{
+  padding:8px 14px;
+  border-radius:8px;
+  color:#fff;
+  text-decoration:none;
+  background:rgba(255,255,255,.14);
+  border:1px solid rgba(255,255,255,.25);
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  line-height:1;
+}
+.lb-btn:hover{ background:rgba(255,255,255,.22); }
+.lb-btn:visited{ color:#fff; }                 /* prevent purple visited */
+.lb-btn:focus{ outline:2px solid #fff3; outline-offset:2px; }  /* a11y focus */
 
 /* ---------- floating buttons ----------- */
 .floating-btn{
@@ -129,6 +149,7 @@ header h2{margin:6px 0 20px;font-size:15px;font-weight:400;}
   .hero{ height: 240px; background-position:center 35%; }
   header{ margin-top:-92px; }
 }
+
 /* --- Emergency: always show media; fade only on hover --- */
 #gallery .item img,
 #gallery .item video{
